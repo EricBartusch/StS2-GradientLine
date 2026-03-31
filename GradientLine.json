@@ -1,6 +1,6 @@
 {
   "id": "GradientLine",
-  "name": "Map Drawing Gradients",
+  "name": "Map Line Gradients",
   "author": "EricB",
   "description": "Changes the color of the map drawing lines to be various gradients",
   "version": "v0.0.1",

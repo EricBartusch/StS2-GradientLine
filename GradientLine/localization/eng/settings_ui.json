@@ -1,6 +1,7 @@
 {
   "GRADIENTLINE.mod_title": "Gradient Line",
-  "GRADIENTLINE-ANIMATE.title": "Enable animation while drawing",
+  "GRADIENTLINE-GRADIENT_TYPE.title": "Gradient",
+  "GRADIENTLINE-ANIMATE.title": "Animate the color while drawing",
   "GRADIENTLINE-ANIMATE_SPEED.title": "Animation Speed",
   "GRADIENTLINE-ANIMATE_SPEED.hover.desc": "Higher is slower"
 }

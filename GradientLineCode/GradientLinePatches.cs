@@ -16,7 +16,7 @@ public class GradientLinePatches
         {
             if (__result == null || isErasing) return;
             GradientFields.StartingHue.Set(__instance, GD.Randf());
-            __result.Gradient = BuildRainbowGradient(GradientFields.StartingHue.Get(__instance));
+            __result.Gradient = GradientUtil.BuildGradient(GradientFields.StartingHue.Get(__instance));
         }
     }
 
@@ -34,24 +34,9 @@ public class GradientLinePatches
 
                 float hueOffset = GradientFields.StartingHue.Get(__instance) +
                                   ((float)((line.GetPointCount() / Config.AnimateSpeed)) % 1f);
-                line.Gradient = BuildRainbowGradient(hueOffset);
+                line.Gradient = GradientUtil.BuildGradient(hueOffset);
             }
         }
-    }
-    
-    static Gradient BuildRainbowGradient(float hueOffset)
-    {
-        const int steps = 16;
-        var colors = new Color[steps];
-        var offsets = new float[steps];
-
-        for (int i = 0; i < steps; i++)
-        {
-            offsets[i] = i / (float)(steps - 1);
-            colors[i] = Color.FromHsv((hueOffset + offsets[i]) % 1f, 1f, 1f);
-        }
-
-        return new Gradient { Colors = colors, Offsets = offsets };
     }
 }
 
