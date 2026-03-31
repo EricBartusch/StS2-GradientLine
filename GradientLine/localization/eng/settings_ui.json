@@ -1,5 +1,6 @@
 {
   "GRADIENTLINE.mod_title": "Gradient Line",
-  "GRADIENTLINE-STEPS.title": "Set the resolution of the gradient. Higher is smoother.",
-  "GRADIENTLINE-GRADIENT_SPEED.title": "Set the speed at which the gradient changes color. Higher is slower"
+  "GRADIENTLINE-ANIMATE.title": "Enable animation while drawing",
+  "GRADIENTLINE-ANIMATE_SPEED.title": "Animation Speed",
+  "GRADIENTLINE-ANIMATE_SPEED.hover.desc": "Higher is slower"
 }
