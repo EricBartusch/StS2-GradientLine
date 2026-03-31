@@ -97,7 +97,6 @@ public class GradientUtil
         new Color(0f, 0.5f, 0f),
         new Color(1f, 1f, 1f),
         new Color(1f, 0f, 0f)
-
     ];
     
     static readonly Color[] SpringColors =
