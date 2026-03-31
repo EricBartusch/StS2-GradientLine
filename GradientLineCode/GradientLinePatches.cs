@@ -28,14 +28,14 @@ public class GradientLinePatches
             var line = Traverse.Create(state).Field("currentlyDrawingLine").GetValue<Line2D>();
             if (!GodotObject.IsInstanceValid(line) || line.Gradient == null) return;
 
-            float hueOffset = (line.GetPointCount() / 120f) % 1f;
+            float hueOffset = (float)((line.GetPointCount() / Config.GradientSpeed) % 1f);
             line.Gradient = BuildRainbowGradient(hueOffset);
         }
     }
     
     static Gradient BuildRainbowGradient(float hueOffset)
     {
-        const int Steps = 8;
+        int Steps = (int)Config.Steps;
         var colors = new Color[Steps];
         var offsets = new float[Steps];
 

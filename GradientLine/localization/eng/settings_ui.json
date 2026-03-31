@@ -1,0 +1,5 @@
+{
+  "GRADIENTLINE.mod_title": "Gradient Line",
+  "GRADIENTLINE-STEPS.title": "Set the resolution of the gradient. Higher is smoother.",
+  "GRADIENTLINE-GRADIENT_SPEED.title": "Set the speed at which the gradient changes color. Higher is slower"
+}
