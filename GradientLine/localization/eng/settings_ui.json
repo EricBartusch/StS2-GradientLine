@@ -3,5 +3,7 @@
   "GRADIENTLINE-GRADIENT_TYPE.title": "Gradient",
   "GRADIENTLINE-ANIMATE.title": "Animate the color while drawing",
   "GRADIENTLINE-ANIMATE_SPEED.title": "Animation Speed",
-  "GRADIENTLINE-ANIMATE_SPEED.hover.desc": "Higher is slower"
+  "GRADIENTLINE-ANIMATE_SPEED.hover.desc": "Higher is slower",
+  "GRADIENTLINE-CUSTOM_COLORS.title": "Custom Gradient Colors",
+  "GRADIENTLINE-CUSTOM_COLORS.hover.desc": "Add up to 10 hex values with # in front (ex. #FFFFFF#FF0000)"
 }

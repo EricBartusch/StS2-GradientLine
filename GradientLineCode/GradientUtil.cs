@@ -11,7 +11,8 @@ public class GradientUtil
         Ocean,
         Monochrome,
         Christmas,
-        Spring
+        Spring,
+        Custom
     }
 
     public static Gradient BuildGradient(float hueOffset)
@@ -23,6 +24,7 @@ public class GradientUtil
             GradientType.Monochrome => BuildKeyframeGradient(hueOffset, MonoColors),
             GradientType.Christmas => BuildKeyframeGradient(hueOffset, ChristmasColors),
             GradientType.Spring => BuildKeyframeGradient(hueOffset, SpringColors),
+            GradientType.Custom => BuildKeyframeCustomGradient(hueOffset),
             GradientType.Rainbow => BuildRainbowGradient(hueOffset)
         };
     }
@@ -46,6 +48,18 @@ public class GradientUtil
         }
 
         return new Gradient { Colors = colors, Offsets = offsets };
+    }
+
+    private static Gradient BuildKeyframeCustomGradient(float hueOffset)
+    {
+        string hexString = Config.CustomColors;
+
+        string[] parts = hexString.Split('#', StringSplitOptions.RemoveEmptyEntries);
+        Color[] colors = parts
+            .Select(hex => new Color($"#{hex}"))
+            .ToArray();
+        
+        return BuildKeyframeGradient(hueOffset, colors);
     }
 
     static Gradient BuildRainbowGradient(float hueOffset)

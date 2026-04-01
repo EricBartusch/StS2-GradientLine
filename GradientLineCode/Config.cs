@@ -11,6 +11,8 @@ public partial class Config : SimpleModConfig
     public static bool Animate { get; set; } = true;
     [SliderRange(30, 200, 10)]
     public static double AnimateSpeed { get; set; } = 120f;
+    [ConfigTextInput("^((#[0-9A-Fa-f]{6})){1,10}$", MaxLength = 70)]
+    public static string CustomColors { get; set; } = "";
 
     
     public override void SetupConfigUI(Control optionContainer)
@@ -29,6 +31,16 @@ public partial class Config : SimpleModConfig
         
         ConfigChanged += (sender, args) =>
         {
+            if (gradientPreview == null)
+                return;
+
+            if (!GodotObject.IsInstanceValid(gradientPreview))
+                return;
+
+            if (!gradientPreview.IsInsideTree())
+                return;
+
+
             gradientPreview.SetGradient(
                 GradientUtil.BuildGradient(0f)
             );
