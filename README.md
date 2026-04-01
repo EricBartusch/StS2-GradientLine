@@ -1,0 +1,67 @@
+# Map Line Gradients
+
+A mod for **Slay the Spire 2** that replaces the plain-colored freehand map drawing lines with animated color gradients.
+
+## Features
+
+- **built-in gradient presets**
+- **Custom palette** - define your own gradient using up to 10 hex color codes
+- **Live preview** of the selected gradient in the mod settings UI
+
+## Requirements
+
+- Slay the Spire 2 (Early Access)
+- [BaseLib](https://github.com/alchyr/BaseLib) mod installed
+
+## Installation
+
+1. Install BaseLib if you haven't already.
+2. Copy the `GradientLine/` folder (containing `GradientLine.dll`, `GradientLine.pck`, and `GradientLine.json`) into your StS2 mods directory.
+
+## Configuration
+
+All settings are available in-game through the mod settings menu:
+
+| Setting | Default | Description |
+|---|---|---|
+| Gradient | Rainbow | Which gradient preset to use |
+| Animate the color while drawing | On | Whether the gradient shifts as you draw |
+| Animation Speed | 120 | Controls how fast the hue shifts (higher = slower); range 30–200 |
+| Custom Gradient Colors | _(empty)_ | Up to 10 hex color codes, each prefixed with `#` (e.g. `#FF0000#00FF00#0000FF`) |
+
+A live gradient preview strip updates in real time as you change settings.
+
+## Building from Source
+
+### Prerequisites
+
+- [.NET 9 SDK](https://dotnet.microsoft.com/download)
+- Godot 4.5.1 (the version bundled with StS2 / "Megadot") - needed only for exporting the `.pck`
+- Slay the Spire 2 installed via Steam
+
+The project auto-detects the Steam library location on Windows, Linux, and macOS. If it can't find the game, the build will error with a helpful message.
+
+### Build (DLL only)
+
+```sh
+dotnet build
+```
+
+This compiles the mod and copies `GradientLine.dll`, `GradientLine.json`, and required BaseLib files directly into the StS2 mods directory.
+
+### Publish (DLL + PCK)
+
+```sh
+dotnet publish
+```
+
+This additionally exports the Godot `.pck` asset bundle using Godot in headless mode.
+
+## How It Works
+
+[GradientLinePatches.cs](GradientLineCode/GradientLinePatches.cs) applies two Harmony postfix patches to the game's `NMapDrawings` class:
+
+- **Line creation** - assigns a gradient with a random starting hue to the new `Line2D` node.
+- **Line update** - if animation is enabled, recalculates the gradient on every new point added so the color crawls forward as the line grows.
+
+[GradientUtil.cs](GradientLineCode/GradientUtil.cs) handles gradient construction.
