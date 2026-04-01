@@ -112,3 +112,7 @@ public static Gradient BuildGradient(float hueOffset)
     };
 }
 ```
+
+## TODO
+- Localization of gradient names
+- Color picker for custom colors
