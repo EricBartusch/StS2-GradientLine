@@ -113,6 +113,9 @@ public static Gradient BuildGradient(float hueOffset)
 }
 ```
 
+## Known Issues
+- Multiplayer lines are all set to the client's config settings
+
 ## TODO
 - Localization of gradient names
 - Color picker for custom colors
