@@ -18,11 +18,21 @@ public class GradientLinePatches
             if (__result == null || isErasing) return;
             
             ulong playerId = player.NetId;
-            float startingHue = Config.RandomizeStartOffset ? GD.Randf() : 0f;
+            
+            // If we don't want to randomize the starting offset or are using random gradient type, this returns 0f
+            float startingHue =
+                (Config.RandomizeStartOffset && Config.GradientType != GradientUtil.GradientType.Random)
+                    ? GD.Randf()
+                    : 0f;            
             
             if (MultiplayerManager.IsLocalPlayer(playerId))
             {
-                __result.Gradient = GradientUtil.BuildGradient(startingHue);
+                if (Config.GradientType == GradientUtil.GradientType.Random)
+                    __result.Gradient = GradientUtil.CreatedGradient;
+                
+                else
+                     __result.Gradient = GradientUtil.BuildGradientFromConfig(startingHue);
+                
                 MultiplayerManager.BroadcastLineStart(startingHue);
             }
             else
@@ -53,7 +63,11 @@ public class GradientLinePatches
 
             if (MultiplayerManager.IsLocalPlayer(netId))
             {
-                line.Gradient = GradientUtil.BuildGradient(hueOffset);
+                if (Config.GradientType == GradientUtil.GradientType.Random)
+                    line.Gradient = GradientUtil.CreatedGradient;
+                
+                else
+                    line.Gradient = GradientUtil.BuildGradientFromConfig(hueOffset);
             }
             else
             {

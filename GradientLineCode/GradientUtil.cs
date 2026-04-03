@@ -4,6 +4,9 @@ namespace GradientLine.GradientLineCode;
 
 public class GradientUtil
 {
+
+    private const int Steps = 16;
+    public static Gradient? CreatedGradient;
     public enum GradientType : ushort
     {
         Rainbow,
@@ -12,10 +15,11 @@ public class GradientUtil
         Monochrome,
         Christmas,
         Spring,
+        Random,
         Custom
     }
 
-    public static Gradient BuildGradient(float hueOffset)
+    public static Gradient BuildGradientFromConfig(float hueOffset)
     {
         return Config.GradientType switch
         {
@@ -24,6 +28,7 @@ public class GradientUtil
             GradientType.Monochrome => BuildKeyframeGradient(hueOffset, GradientsPresets.MonoColors),
             GradientType.Christmas => BuildKeyframeGradient(hueOffset, GradientsPresets.ChristmasColors),
             GradientType.Spring => BuildKeyframeGradient(hueOffset, GradientsPresets.SpringColors),
+            GradientType.Random => BuildKeyframeGradient(0f, BuildRandomColors((int)Config.RandomGradientSize)),
             GradientType.Custom => BuildKeyframeCustomGradient(hueOffset),
             GradientType.Rainbow => BuildRainbowGradient(hueOffset)
         };
@@ -38,14 +43,14 @@ public class GradientUtil
             GradientType.Monochrome => BuildKeyframeGradient(hueOffset, GradientsPresets.MonoColors),
             GradientType.Christmas => BuildKeyframeGradient(hueOffset, GradientsPresets.ChristmasColors),
             GradientType.Spring => BuildKeyframeGradient(hueOffset, GradientsPresets.SpringColors),
+            GradientType.Random => BuildKeyframeGradient(0f, BuildRandomColors((int)Config.RandomGradientSize)),
             GradientType.Custom => BuildKeyframeCustomGradient(hueOffset),
             GradientType.Rainbow => BuildRainbowGradient(hueOffset)
         };
     }
 
-    static Gradient BuildKeyframeGradient(float hueOffset, Color[] keyColors)
+    private static Gradient BuildKeyframeGradient(float hueOffset, Color[] keyColors)
     {
-        const int Steps = 16;
         var colors = new Color[Steps];
         var offsets = new float[Steps];
         int n = keyColors.Length;
@@ -76,9 +81,8 @@ public class GradientUtil
         return BuildKeyframeGradient(hueOffset, colors);
     }
 
-    static Gradient BuildRainbowGradient(float hueOffset)
+    private static Gradient BuildRainbowGradient(float hueOffset)
     {
-        const int Steps = 16;
         var colors = new Color[Steps];
         var offsets = new float[Steps];
         for (int i = 0; i < Steps; i++)
@@ -89,6 +93,22 @@ public class GradientUtil
 
         return new Gradient { Colors = colors, Offsets = offsets };
     }
-
     
+    private static Color[] BuildRandomColors(int size)
+    {
+        var rng = new Random();
+        var colors = new Color[size];
+        
+        for (int i = 0; i < size; i++)
+        {
+            colors[i] = new Color(
+                (float)rng.NextDouble(),
+                (float)rng.NextDouble(),
+                (float)rng.NextDouble()
+            );
+        }
+        
+        colors[size - 1] = colors[0]; // Make last the same as the first so it looks nicer
+        return colors;
+    }
 }

@@ -15,6 +15,9 @@ public class Config : SimpleModConfig
     
     public static string CustomColors { get; set; } = "";
 
+    [SliderRange(2, 10)]
+    public static double RandomGradientSize { get; set; } = 5;
+
     private readonly List<EventHandler> _configChangedHandlers = [];
     private float _previewHueOffset;
     private bool _wasRandomizeEnabled;
@@ -38,7 +41,10 @@ public class Config : SimpleModConfig
     {
         GradientPreviewControl gradientPreview = new GradientPreviewControl();
         gradientPreview.CustomMinimumSize = new Vector2(120, 16);
-        gradientPreview.SetGradient(GradientUtil.BuildGradient(_previewHueOffset));
+        
+        // Save the gradient made here for if they use the random option
+        GradientUtil.CreatedGradient = GradientUtil.BuildGradientFromConfig(_previewHueOffset);
+        gradientPreview.SetGradient(GradientUtil.CreatedGradient);
         
         EventHandler gradientUpdateHandler = (sender, args) =>
         {
@@ -53,8 +59,9 @@ public class Config : SimpleModConfig
             // Update tracking state
             _wasRandomizeEnabled = RandomizeStartOffset;
             _lastGradientType = GradientType;
-            
-            gradientPreview.SetGradient(GradientUtil.BuildGradient(_previewHueOffset));
+
+            GradientUtil.CreatedGradient = GradientUtil.BuildGradientFromConfig(_previewHueOffset);
+            gradientPreview.SetGradient(GradientUtil.CreatedGradient);
         };
         
         ConfigChanged += gradientUpdateHandler;
