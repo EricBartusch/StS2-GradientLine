@@ -1,6 +1,8 @@
 ﻿using BaseLib.Utils;
 using Godot;
+using GodotPlugins.Game;
 using HarmonyLib;
+using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Nodes.Screens.Map;
 
@@ -15,8 +17,19 @@ public class GradientLinePatches
         static void Postfix(NMapDrawings __instance, Player player, bool isErasing, ref Line2D __result)
         {
             if (__result == null || isErasing) return;
-            GradientFields.StartingHue.Set(__instance, GD.Randf());
-            __result.Gradient = GradientUtil.BuildGradient(GradientFields.StartingHue.Get(__instance));
+            
+            ulong netId = player.NetId;
+            ulong localId = NetworkPatches.localPlayerId;
+            bool isLocal = netId == localId;
+            
+            if (isLocal)
+                __result.Gradient = GradientUtil.BuildGradient(NetworkPatches.LocalStartingHue);
+
+
+            else
+                __result.Gradient = GradientUtil.BuildSpecificGradient(NetworkPatches._playerGradients[netId],
+                    NetworkPatches._playerStartingHues[netId]);
+            
         }
     }
 
@@ -29,18 +42,30 @@ public class GradientLinePatches
         {
             if (Config.Animate)
             {
+                ulong netId = Traverse.Create(state).Field("playerId").GetValue<ulong>();
+                ulong localId = NetworkPatches.localPlayerId;
+                bool isLocal = netId == localId;
+                
                 var line = Traverse.Create(state).Field("currentlyDrawingLine").GetValue<Line2D>();
                 if (!GodotObject.IsInstanceValid(line) || line.Gradient == null) return;
+            
 
-                float hueOffset = GradientFields.StartingHue.Get(__instance) +
-                                  ((float)((line.GetPointCount() / Config.AnimateSpeed)) % 1f);
-                line.Gradient = GradientUtil.BuildGradient(hueOffset);
+                if (isLocal)
+                {
+                    float hueOffset = NetworkPatches.LocalStartingHue +
+                                      (float)(line.GetPointCount() / Config.AnimateSpeed) % 1f;
+                    line.Gradient = GradientUtil.BuildGradient(hueOffset);
+                }
+
+                else
+                {
+                    float hueOffset = NetworkPatches._playerStartingHues[netId] +
+                                      (float)(line.GetPointCount() / Config.AnimateSpeed) % 1f;
+                    line.Gradient = GradientUtil.BuildSpecificGradient(NetworkPatches._playerGradients[netId],
+                        hueOffset);
+                }
+
             }
         }
     }
-}
-
-public class GradientFields
-{
-    public static readonly SpireField<NMapDrawings, float> StartingHue = new(() => 0f);
 }

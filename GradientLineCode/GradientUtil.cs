@@ -4,7 +4,7 @@ namespace GradientLine.GradientLineCode;
 
 public class GradientUtil
 {
-    public enum GradientType
+    public enum GradientType : ushort
     {
         Rainbow,
         Fire,
@@ -18,6 +18,21 @@ public class GradientUtil
     public static Gradient BuildGradient(float hueOffset)
     {
         return Config.GradientType switch
+        {
+            GradientType.Fire => BuildKeyframeGradient(hueOffset, FireColors),
+            GradientType.Ocean => BuildKeyframeGradient(hueOffset, OceanColors),
+            GradientType.Monochrome => BuildKeyframeGradient(hueOffset, MonoColors),
+            GradientType.Christmas => BuildKeyframeGradient(hueOffset, ChristmasColors),
+            GradientType.Spring => BuildKeyframeGradient(hueOffset, SpringColors),
+            GradientType.Custom => BuildKeyframeCustomGradient(hueOffset),
+            GradientType.Rainbow => BuildRainbowGradient(hueOffset)
+        };
+    }
+    
+    public static Gradient BuildSpecificGradient(GradientType type, float hueOffset)
+    {
+        MainFile.Logger.Info($"Building gradient for {type}");
+        return type switch
         {
             GradientType.Fire => BuildKeyframeGradient(hueOffset, FireColors),
             GradientType.Ocean => BuildKeyframeGradient(hueOffset, OceanColors),
