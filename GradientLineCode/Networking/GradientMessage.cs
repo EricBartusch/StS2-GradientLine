@@ -8,7 +8,6 @@ public class GradientMessage : INetMessage, IPacketSerializable
 {
     public ulong PlayerId;
     public GradientUtil.GradientType GradientType;
-    public float StartingHue;
 
     public bool ShouldBroadcast => true;
     public NetTransferMode Mode => NetTransferMode.Reliable;
@@ -18,14 +17,11 @@ public class GradientMessage : INetMessage, IPacketSerializable
     {
         writer.WriteULong(PlayerId);
         writer.WriteUShort((ushort)GradientType);
-        writer.WriteFloat(StartingHue);
     }
 
     public void Deserialize(PacketReader reader)
     {
         PlayerId = reader.ReadULong();
         GradientType = (GradientUtil.GradientType)reader.ReadShort();
-        StartingHue = reader.ReadFloat();
     }
-    
 }

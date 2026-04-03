@@ -9,17 +9,16 @@ public static class MultiplayerManager
     private static ulong _localPlayerId;
     
     private static readonly Dictionary<ulong, GradientUtil.GradientType> _playerGradients = new();
-    private static readonly Dictionary<ulong, float> _playerStartingHues = new();
-
+    private static readonly Dictionary<ulong, float> _currentLineHues = new();
     
     public static ulong LocalPlayerId => _localPlayerId;
-    public static float LocalStartingHue { get; private set; } = Config.RandomizeStartOffset ? GD.Randf() : 0f;
     
     public static void Initialize(INetGameService netGameService)
     {
         _netGameService = netGameService;
         _localPlayerId = netGameService.NetId;
         netGameService.RegisterMessageHandler<GradientMessage>(OnGradientMessageReceived);
+        netGameService.RegisterMessageHandler<LineStartMessage>(OnLineStartMessageReceived);
     }
     
     public static void BroadcastLocalGradient()
@@ -32,8 +31,25 @@ public static class MultiplayerManager
         var message = new GradientMessage
         {
             PlayerId = _localPlayerId,
-            GradientType = Config.GradientType,
-            StartingHue = LocalStartingHue
+            GradientType = Config.GradientType
+        };
+        
+        _netGameService.SendMessage(message);
+    }
+
+    public static void BroadcastLineStart(float startingHue)
+    {
+        if (_localPlayerId == 0 || _netGameService == null)
+            return;
+        
+        // Store locally
+        _currentLineHues[_localPlayerId] = startingHue;
+        
+        // Broadcast to other players
+        var message = new LineStartMessage
+        {
+            PlayerId = _localPlayerId,
+            StartingHue = startingHue
         };
         
         _netGameService.SendMessage(message);
@@ -45,10 +61,10 @@ public static class MultiplayerManager
             ? type 
             : GradientUtil.GradientType.Rainbow;
     }
-
-    public static float GetPlayerStartingHue(ulong playerId)
+    
+    public static float GetCurrentLineHue(ulong playerId)
     {
-        return _playerStartingHues.TryGetValue(playerId, out var hue) 
+        return _currentLineHues.TryGetValue(playerId, out var hue) 
             ? hue 
             : 0f;
     }
@@ -63,6 +79,10 @@ public static class MultiplayerManager
     private static void OnGradientMessageReceived(GradientMessage message, ulong senderId)
     {
         _playerGradients[senderId] = message.GradientType;
-        _playerStartingHues[senderId] = message.StartingHue;
+    }
+    
+    private static void OnLineStartMessageReceived(LineStartMessage message, ulong senderId)
+    {
+        _currentLineHues[senderId] = message.StartingHue;
     }
 }

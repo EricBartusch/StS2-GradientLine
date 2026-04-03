@@ -9,7 +9,7 @@ namespace GradientLine.GradientLineCode;
 
 public class GradientLinePatches
 {
-    [HarmonyPatch(typeof(NMapDrawings),  "CreateLineForPlayer")]
+    [HarmonyPatch(typeof(NMapDrawings), "CreateLineForPlayer")]
     public static class SetGradientPatch
     {
         [HarmonyPostfix]
@@ -17,43 +17,49 @@ public class GradientLinePatches
         {
             if (__result == null || isErasing) return;
             
-            if (MultiplayerManager.IsLocalPlayer(player.NetId))
-                __result.Gradient = GradientUtil.BuildGradient(Config.RandomizeStartOffset ? GD.Randf() : 0f);
+            ulong playerId = player.NetId;
+            float startingHue = Config.RandomizeStartOffset ? GD.Randf() : 0f;
             
+            if (MultiplayerManager.IsLocalPlayer(playerId))
+            {
+                __result.Gradient = GradientUtil.BuildGradient(startingHue);
+                MultiplayerManager.BroadcastLineStart(startingHue);
+            }
             else
-                __result.Gradient = GradientUtil.BuildSpecificGradient(MultiplayerManager.GetPlayerGradientType(player.NetId),
-                    MultiplayerManager.GetPlayerStartingHue(player.NetId));
-            
+            {
+                float remoteHue = MultiplayerManager.GetCurrentLineHue(playerId);
+                __result.Gradient = GradientUtil.BuildSpecificGradient(
+                    MultiplayerManager.GetPlayerGradientType(playerId),
+                    remoteHue);
+            }
         }
     }
 
-    [HarmonyPatch(typeof(NMapDrawings),  "UpdateCurrentLinePosition")]
+    [HarmonyPatch(typeof(NMapDrawings), "UpdateCurrentLinePosition")]
     public static class UpdateGradientPatch
     {
         [HarmonyPostfix]
         static void Postfix(NMapDrawings __instance, object state, Vector2 position)
         {
+            if (!Config.Animate)
+                return;
             
-            if (Config.Animate)
+            ulong netId = Traverse.Create(state).Field("playerId").GetValue<ulong>();
+            var line = Traverse.Create(state).Field("currentlyDrawingLine").GetValue<Line2D>();
+            if (!GodotObject.IsInstanceValid(line) || line.Gradient == null) return;
+
+            float currentLineHue = MultiplayerManager.GetCurrentLineHue(netId);
+            float hueOffset = currentLineHue + (float)(line.GetPointCount() / Config.AnimateSpeed) % 1f;
+
+            if (MultiplayerManager.IsLocalPlayer(netId))
             {
-                ulong netId = Traverse.Create(state).Field("playerId").GetValue<ulong>();
-                var line = Traverse.Create(state).Field("currentlyDrawingLine").GetValue<Line2D>();
-                if (!GodotObject.IsInstanceValid(line) || line.Gradient == null) return;
-
-                if (MultiplayerManager.IsLocalPlayer(netId))
-                {
-                    float hueOffset = MultiplayerManager.LocalStartingHue +
-                                      (float)(line.GetPointCount() / Config.AnimateSpeed) % 1f;
-                    line.Gradient = GradientUtil.BuildGradient(hueOffset);
-                }
-
-                else
-                {
-                    float hueOffset = MultiplayerManager.GetPlayerStartingHue(netId) +
-                                      (float)(line.GetPointCount() / Config.AnimateSpeed) % 1f;
-                    line.Gradient = GradientUtil.BuildSpecificGradient(MultiplayerManager.GetPlayerGradientType(netId),
-                        hueOffset);
-                }
+                line.Gradient = GradientUtil.BuildGradient(hueOffset);
+            }
+            else
+            {
+                line.Gradient = GradientUtil.BuildSpecificGradient(
+                    MultiplayerManager.GetPlayerGradientType(netId),
+                    hueOffset);
             }
         }
     }
