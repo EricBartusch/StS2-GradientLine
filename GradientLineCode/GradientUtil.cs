@@ -31,7 +31,6 @@ public class GradientUtil
     
     public static Gradient BuildSpecificGradient(GradientType type, float hueOffset)
     {
-        MainFile.Logger.Info($"Building gradient for {type}");
         return type switch
         {
             GradientType.Fire => BuildKeyframeGradient(hueOffset, GradientsPresets.FireColors),
