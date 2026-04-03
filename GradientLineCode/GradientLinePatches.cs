@@ -18,7 +18,7 @@ public class GradientLinePatches
             if (__result == null || isErasing) return;
             
             if (MultiplayerManager.IsLocalPlayer(player.NetId))
-                __result.Gradient = GradientUtil.BuildGradient(MultiplayerManager.LocalStartingHue);
+                __result.Gradient = GradientUtil.BuildGradient(Config.RandomizeStartOffset ? GD.Randf() : 0f);
             
             else
                 __result.Gradient = GradientUtil.BuildSpecificGradient(MultiplayerManager.GetPlayerGradientType(player.NetId),

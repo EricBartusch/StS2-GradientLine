@@ -8,6 +8,7 @@ public class Config : SimpleModConfig
 {
     public static GradientUtil.GradientType GradientType { get; set; } = GradientUtil.GradientType.Rainbow;
     public static bool Animate { get; set; } = true;
+    public static bool RandomizeStartOffset { get; set; } = true;
     [SliderRange(30, 200, 10)]
     public static double AnimateSpeed { get; set; } = 120f;
     [ConfigTextInput("^((#[0-9A-Fa-f]{6})){1,10}$", MaxLength = 70)]

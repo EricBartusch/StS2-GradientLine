@@ -13,7 +13,7 @@ public static class MultiplayerManager
 
     
     public static ulong LocalPlayerId => _localPlayerId;
-    public static float LocalStartingHue { get; private set; } = GD.Randf();
+    public static float LocalStartingHue { get; private set; } = Config.RandomizeStartOffset ? GD.Randf() : 0f;
     
     public static void Initialize(INetGameService netGameService)
     {
@@ -64,14 +64,5 @@ public static class MultiplayerManager
     {
         _playerGradients[senderId] = message.GradientType;
         _playerStartingHues[senderId] = message.StartingHue;
-    }
-    
-    public static void Reset()
-    {
-        _playerGradients.Clear();
-        _playerStartingHues.Clear();
-        _netGameService = null;
-        _localPlayerId = 0;
-        LocalStartingHue = GD.Randf();
     }
 }
