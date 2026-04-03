@@ -97,7 +97,7 @@ public class GradientUtil
     private static Color[] BuildRandomColors(int size)
     {
         var rng = new Random();
-        var colors = new Color[size];
+        var colors = new Color[size + 1]; // account for making the smoothing color
         
         for (int i = 0; i < size; i++)
         {
@@ -108,7 +108,7 @@ public class GradientUtil
             );
         }
         
-        colors[size - 1] = colors[0]; // Make last the same as the first so it looks nicer
+        colors[size] = colors[0]; // Make last the same as the first so it looks nicer
         return colors;
     }
 }

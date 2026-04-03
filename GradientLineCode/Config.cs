@@ -21,6 +21,7 @@ public class Config : SimpleModConfig
     private readonly List<EventHandler> _configChangedHandlers = [];
     private float _previewHueOffset;
     private bool _wasRandomizeEnabled;
+    private double _lastRandomGradientSize;
     private GradientUtil.GradientType _lastGradientType;
 
     
@@ -54,14 +55,23 @@ public class Config : SimpleModConfig
             if (!gradientPreview.IsInsideTree())
                 return;
 
+            bool shouldRebuildGradient = ShouldRebuildGradient();
+
             MaybeSometimesUpdatePreviewOffset();
 
             // Update tracking state
             _wasRandomizeEnabled = RandomizeStartOffset;
+            bool reselectedRandom =
+                GradientType == GradientUtil.GradientType.Random &&
+                _lastGradientType == GradientUtil.GradientType.Random;
             _lastGradientType = GradientType;
+            _lastRandomGradientSize = RandomGradientSize;
 
-            GradientUtil.CreatedGradient = GradientUtil.BuildGradientFromConfig(_previewHueOffset);
-            gradientPreview.SetGradient(GradientUtil.CreatedGradient);
+            if (shouldRebuildGradient || reselectedRandom)
+            {
+                GradientUtil.CreatedGradient = GradientUtil.BuildGradientFromConfig(_previewHueOffset);
+                gradientPreview.SetGradient(GradientUtil.CreatedGradient);
+            }
         };
         
         ConfigChanged += gradientUpdateHandler;
@@ -95,6 +105,15 @@ public class Config : SimpleModConfig
             _previewHueOffset = 0f;
         }
         // Otherwise keep the existing offset
+    }
+    
+    // Random gradient should only be regenerated if the gradient or the amount of colors in the gradient changed
+    private bool ShouldRebuildGradient()
+    {
+        bool gradientTypeChanged = GradientType != _lastGradientType;
+        bool customColorsChanged = RandomGradientSize != _lastRandomGradientSize;
+
+        return gradientTypeChanged || customColorsChanged;
     }
 
     private void ClearUIEventHandlers()
