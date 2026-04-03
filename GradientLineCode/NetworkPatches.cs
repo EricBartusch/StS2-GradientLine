@@ -1,20 +1,17 @@
 ﻿using Godot;
 using HarmonyLib;
-using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Multiplayer;
-using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Multiplayer.Game;
 using MegaCrit.Sts2.Core.Multiplayer.Game.Lobby;
 using MegaCrit.Sts2.Core.Nodes.Screens.CharacterSelect;
 using MegaCrit.Sts2.Core.Nodes.Screens.Map;
 using MegaCrit.Sts2.Core.Runs;
 using MegaCrit.Sts2.Core.Saves;
-using Logger = Godot.Logger;
 
 namespace GradientLine.GradientLineCode;
 
 [HarmonyPatch]
-public static partial class NetworkPatches
+public static class NetworkPatches
 {
     public static ulong localPlayerId;
     private static INetGameService? _netGameService;
@@ -69,7 +66,6 @@ public static partial class NetworkPatches
     
     static void RecieveGradient(GradientMessage message, ulong senderId)
     {
-        MainFile.Logger.Info("\n\n\n\n");
         _playerGradients.Add(senderId, message.GradientType);
         _playerStartingHues.Add(senderId, message.StartingHue);
     }

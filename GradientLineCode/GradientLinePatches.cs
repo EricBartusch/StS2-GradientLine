@@ -1,8 +1,5 @@
-﻿using BaseLib.Utils;
-using Godot;
-using GodotPlugins.Game;
+﻿using Godot;
 using HarmonyLib;
-using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Nodes.Screens.Map;
 
