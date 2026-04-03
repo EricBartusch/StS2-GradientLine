@@ -38,9 +38,16 @@ public class GradientLinePatches
             else
             {
                 float remoteHue = MultiplayerManager.GetCurrentLineHue(playerId);
-                __result.Gradient = GradientUtil.BuildSpecificGradient(
-                    MultiplayerManager.GetPlayerGradientType(playerId),
-                    remoteHue);
+                GradientUtil.GradientType gradientType = MultiplayerManager.GetPlayerGradientType(playerId);
+
+                if (gradientType == GradientUtil.GradientType.Random)
+                {
+                    __result.Gradient = MultiplayerManager.GetPlayerGradient(playerId);
+                }
+                else
+                {
+                    __result.Gradient = GradientUtil.BuildSpecificGradient(gradientType, remoteHue);
+                }
             }
         }
     }
@@ -71,9 +78,15 @@ public class GradientLinePatches
             }
             else
             {
-                line.Gradient = GradientUtil.BuildSpecificGradient(
-                    MultiplayerManager.GetPlayerGradientType(netId),
-                    hueOffset);
+                GradientUtil.GradientType gradientType = MultiplayerManager.GetPlayerGradientType(netId);
+                if (gradientType == GradientUtil.GradientType.Random)
+                {
+                    line.Gradient = MultiplayerManager.GetPlayerGradient(netId);
+                }
+                else
+                {
+                    line.Gradient = GradientUtil.BuildSpecificGradient(gradientType, hueOffset);
+                }
             }
         }
     }
