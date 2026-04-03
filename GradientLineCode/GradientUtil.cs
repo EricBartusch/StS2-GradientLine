@@ -4,7 +4,7 @@ namespace GradientLine.GradientLineCode;
 
 public class GradientUtil
 {
-    public enum GradientType
+    public enum GradientType : ushort
     {
         Rainbow,
         Fire,
@@ -19,11 +19,25 @@ public class GradientUtil
     {
         return Config.GradientType switch
         {
-            GradientType.Fire => BuildKeyframeGradient(hueOffset, FireColors),
-            GradientType.Ocean => BuildKeyframeGradient(hueOffset, OceanColors),
-            GradientType.Monochrome => BuildKeyframeGradient(hueOffset, MonoColors),
-            GradientType.Christmas => BuildKeyframeGradient(hueOffset, ChristmasColors),
-            GradientType.Spring => BuildKeyframeGradient(hueOffset, SpringColors),
+            GradientType.Fire => BuildKeyframeGradient(hueOffset, GradientsPresets.FireColors),
+            GradientType.Ocean => BuildKeyframeGradient(hueOffset, GradientsPresets.OceanColors),
+            GradientType.Monochrome => BuildKeyframeGradient(hueOffset, GradientsPresets.MonoColors),
+            GradientType.Christmas => BuildKeyframeGradient(hueOffset, GradientsPresets.ChristmasColors),
+            GradientType.Spring => BuildKeyframeGradient(hueOffset, GradientsPresets.SpringColors),
+            GradientType.Custom => BuildKeyframeCustomGradient(hueOffset),
+            GradientType.Rainbow => BuildRainbowGradient(hueOffset)
+        };
+    }
+    
+    public static Gradient BuildSpecificGradient(GradientType type, float hueOffset)
+    {
+        return type switch
+        {
+            GradientType.Fire => BuildKeyframeGradient(hueOffset, GradientsPresets.FireColors),
+            GradientType.Ocean => BuildKeyframeGradient(hueOffset, GradientsPresets.OceanColors),
+            GradientType.Monochrome => BuildKeyframeGradient(hueOffset, GradientsPresets.MonoColors),
+            GradientType.Christmas => BuildKeyframeGradient(hueOffset, GradientsPresets.ChristmasColors),
+            GradientType.Spring => BuildKeyframeGradient(hueOffset, GradientsPresets.SpringColors),
             GradientType.Custom => BuildKeyframeCustomGradient(hueOffset),
             GradientType.Rainbow => BuildRainbowGradient(hueOffset)
         };
@@ -76,50 +90,5 @@ public class GradientUtil
         return new Gradient { Colors = colors, Offsets = offsets };
     }
 
-    static readonly Color[] FireColors =
-    [
-        new Color(0.1f, 0f, 0f),
-        new Color(0.8f, 0.1f, 0f),
-        new Color(1f, 0.5f, 0f),
-        new Color(1f, 0.9f, 0.2f),
-        new Color(1f, 1f, 0.8f),
-        new Color(0.1f, 0f, 0f)
-    ];
-
-    static readonly Color[] OceanColors =
-    [
-        new Color(0f, 0.05f, 0.2f),
-        new Color(0f, 0.3f, 0.6f),
-        new Color(0f, 0.7f, 0.9f),
-        new Color(0.4f, 0.9f, 1f),
-        new Color(0.8f, 1f, 1f),
-        new Color(0f, 0.05f, 0.2f)
-    ];
-
-    static readonly Color[] MonoColors =
-    [
-        new Color(0.1f, 0.1f, 0.1f),
-        new Color(1f, 1f, 1f),
-        new Color(0.1f, 0.1f, 0.1f)
-    ];
     
-    static readonly Color[] ChristmasColors =
-    [
-        new Color(1f, 0f, 0f),
-        new Color(1f, 1f, 1f),
-        new Color(0f, 0.5f, 0f),
-        new Color(0f, 0.5f, 0f),
-        new Color(1f, 1f, 1f),
-        new Color(1f, 0f, 0f)
-    ];
-    
-    static readonly Color[] SpringColors =
-    {
-        new Color(1f, 0.8f, 0.9f), // pastel pink
-        new Color(0.9f, 0.9f, 1f), // pastel lavender
-        new Color(0.8f, 1f, 0.9f), // pastel mint
-        new Color(0.9f, 1f, 0.8f), // pastel yellow-green
-        new Color(1f, 0.95f, 0.8f), // pastel peach
-        new Color(1f, 0.8f, 0.9f)
-    };
 }

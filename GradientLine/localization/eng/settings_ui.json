@@ -2,6 +2,8 @@
   "GRADIENTLINE.mod_title": "Gradient Line",
   "GRADIENTLINE-GRADIENT_TYPE.title": "Gradient",
   "GRADIENTLINE-ANIMATE.title": "Animate the color while drawing",
+  "GRADIENTLINE-RANDOMIZE_START_OFFSET.title": "Randomize hue offset",
+  "GRADIENTLINE-RANDOMIZE_START_OFFSET.hover.desc": "Start each line at a different part of the gradient",
   "GRADIENTLINE-ANIMATE_SPEED.title": "Animation Speed",
   "GRADIENTLINE-ANIMATE_SPEED.hover.desc": "Higher is slower",
   "GRADIENTLINE-CUSTOM_COLORS.title": "Custom Gradient Colors",

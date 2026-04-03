@@ -4,9 +4,10 @@ A mod for **Slay the Spire 2** that replaces the plain-colored freehand map draw
 
 ## Features
 
-- **built-in gradient presets**
+- **Built-in gradient presets**
 - **Custom palette** - define your own gradient using up to 10 hex color codes
 - **Live preview** of the selected gradient in the mod settings UI
+- **Multiplayer support** - each player's gradient preferences are synced across clients
 
 ## Requirements
 
@@ -27,6 +28,7 @@ All settings are available in-game through the mod settings menu:
 | Gradient | Rainbow | Which gradient preset to use |
 | Animate the color while drawing | On | Whether the gradient shifts as you draw |
 | Animation Speed | 120 | Controls how fast the hue shifts (higher = slower); range 30–200 |
+| Randomize Start Offset | On | Whether each line starts with a random hue |
 | Custom Gradient Colors | _(empty)_ | Up to 10 hex color codes, each prefixed with `#` (e.g. `#FF0000#00FF00#0000FF`) |
 
 A live gradient preview strip updates in real time as you change settings.
@@ -59,21 +61,31 @@ This additionally exports the Godot `.pck` asset bundle using Godot in headless 
 
 ## How It Works
 
+### Core Rendering
 [GradientLinePatches.cs](GradientLineCode/GradientLinePatches.cs) applies two Harmony postfix patches to the game's `NMapDrawings` class:
 
-- **Line creation** - assigns a gradient with a random starting hue to the new `Line2D` node.
-- **Line update** - if animation is enabled, recalculates the gradient on every new point added so the color crawls forward as the line grows.
+- **Line creation** (`CreateLineForPlayer`) - assigns a gradient with a randomized starting hue to the new `Line2D` node
+- **Line update** (`UpdateCurrentLinePosition`) - if animation is enabled, recalculates the gradient on every new point added so the color shifts as the line grows
 
-[GradientUtil.cs](GradientLineCode/GradientUtil.cs) handles gradient construction.
+### Gradient Generation
+[GradientUtil.cs](GradientLineCode/GradientUtil.cs) handles gradient construction using either:
+- **Rainbow mode**: Procedurally generated HSV color wheel
+- **Keyframe mode**: Interpolation between color keyframes defined in [GradientsPresets.cs](GradientLineCode/GradientsPresets.cs)
+- **Custom mode**: User-defined hex colors from config
+
+### Multiplayer Synchronization
+[MultiplayerManager.cs](GradientLineCode/Networking/MultiplayerManager.cs) coordinates gradient state across clients:
+- **Gradient type sync**: `GradientMessage` broadcasts each player's preset/custom choice when joining or entering the map
+- **Per-line hue sync**: `LineStartMessage` broadcasts the random starting hue whenever a player starts drawing, ensuring all clients render identical gradients
 
 ## Contributing New Gradient Presets
 
-Adding a new built-in preset requires changes to three places in [GradientUtil.cs](GradientLineCode/GradientUtil.cs):
+Adding a new built-in preset requires changes to two files:
 
-### 1. Add the preset to the `GradientType` enum
+### 1. Add the preset to `GradientType` enum in [GradientUtil.cs](GradientLineCode/GradientUtil.cs)
 
 ```csharp
-public enum GradientType
+public enum GradientType : ushort
 {
     Rainbow,
     Fire,
@@ -83,21 +95,11 @@ public enum GradientType
 }
 ```
 
-### 2. Define the color keyframes
+### 2. Define color keyframes in [GradientsPresets.cs](GradientLineCode/GradientsPresets.cs)
 
-Making the last color identical to the first is recommended because a mismatch between the end and start colors creates a visible hard jump as the hue cycles.
+Making the last color identical to the first is recommended because a mismatch between the end and start colors creates a visible hard
 
-```csharp
-static readonly Color[] YourPresetColors =
-[
-    new Color(r, g, b),
-    new Color(r, g, b),
-    // ...
-    new Color(r, g, b)  // repeat first color to loop
-];
-```
-
-### 3. Wire it up in `BuildGradient`
+### 3. Wire it up in `BuildGradient` and `BuildSpecificGradient`
 
 Add a case to the switch expression:
 
@@ -112,9 +114,6 @@ public static Gradient BuildGradient(float hueOffset)
     };
 }
 ```
-
-## Known Issues
-- Multiplayer lines are all set to the client's config settings
 
 ## TODO
 - Localization of gradient names
