@@ -20,6 +20,8 @@ public class Config : SimpleModConfig
     [ConfigVisibleWhen(nameof(GradientType), GradientUtil.GradientType.Random)]
     [SliderRange(2, 10)]
     public static double RandomGradientSize { get; set; } = 5;
+    [ConfigVisibleWhen(nameof(GradientType), GradientUtil.GradientType.Random)]
+    public static bool RandomizeEachLine { get; set; } = false;
 
     [ConfigVisibleWhen(nameof(GradientType), GradientUtil.GradientType.Random)]
     [ConfigButton("RerollRandom")]

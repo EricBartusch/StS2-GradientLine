@@ -27,12 +27,8 @@ public class GradientLinePatches
             
             if (MultiplayerManager.IsLocalPlayer(playerId))
             {
-                if (Config.GradientType == GradientUtil.GradientType.Random)
-                    __result.Gradient = Config.GetSavedRandomGradient();
-                
-                else
-                     __result.Gradient = GradientUtil.BuildGradient(Config.GradientType, startingHue);
-                
+                __result.Gradient = GradientUtil.BuildGradient(Config.GradientType, startingHue, Config.GetSavedRandomGradient(), Config.RandomizeEachLine);
+                Config.SetSavedRandomGradient(__result.Gradient);
                 MultiplayerManager.BroadcastLineStart(startingHue);
             }
             else
@@ -70,7 +66,7 @@ public class GradientLinePatches
             
             if (MultiplayerManager.IsLocalPlayer(netId))
             {
-                line.Gradient = GradientUtil.BuildGradient(Config.GradientType, hueOffset, Config.GetSavedRandomGradient());
+                line.Gradient = GradientUtil.BuildGradient(Config.GradientType, hueOffset, Config.GetSavedRandomGradient()); 
             }
             else
             {

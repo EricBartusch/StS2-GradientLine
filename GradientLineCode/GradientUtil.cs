@@ -5,7 +5,7 @@ namespace GradientLine.GradientLineCode;
 public class GradientUtil
 {
     private const int Steps = 16;
-    private static readonly Dictionary<GradientType, Color[]> _baseGradientColors = new();
+    private static readonly Dictionary<GradientType, Color[]> BaseGradientColorsCache = new();
 
     public enum GradientType : ushort
     {
@@ -19,21 +19,20 @@ public class GradientUtil
         Custom
     }
 
-    public static Gradient BuildGradient(GradientType type, float hueOffset, Gradient? savedRandomGradient = null)
+    public static Gradient BuildGradient(GradientType type, float hueOffset, Gradient? savedRandomGradient = null, bool reRandomize = false)
     {
         if (type == GradientType.Random)
         {
-            if (savedRandomGradient is not null)
+            if (savedRandomGradient is null || reRandomize)
             {
-                return BuildKeyframeFromGradientColors(savedRandomGradient, hueOffset);
+                // Generate new random - don't cache it since it should be ephemeral
+                return BuildKeyframeGradient(hueOffset, BuildRandomColors((int)Config.RandomGradientSize));
             }
-
-            // Generate new random - don't cache it since it should be ephemeral
-            return BuildKeyframeGradient(hueOffset, BuildRandomColors((int)Config.RandomGradientSize));
+            return BuildKeyframeFromGradientColors(savedRandomGradient, hueOffset);
         }
     
         // Cache these values as used because they will never change
-        if (!_baseGradientColors.TryGetValue(type, out var baseColors))
+        if (!BaseGradientColorsCache.TryGetValue(type, out var baseColors))
         {
             baseColors = type switch
             {
@@ -48,7 +47,7 @@ public class GradientUtil
             };
         
             if (baseColors != null)
-                _baseGradientColors[type] = baseColors;
+                BaseGradientColorsCache[type] = baseColors;
         }
     
         if (type == GradientType.Rainbow)
