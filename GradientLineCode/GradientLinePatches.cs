@@ -70,7 +70,7 @@ public class GradientLinePatches
 
             if (MultiplayerManager.IsLocalPlayer(netId))
             {
-                line.Gradient = GradientUtil.BuildGradient(Config.GradientType, hueOffset);
+                line.Gradient = GradientUtil.BuildGradient(Config.GradientType, hueOffset, Config.GetSavedRandomGradient());
             }
             else
             {

@@ -4,8 +4,8 @@ namespace GradientLine.GradientLineCode;
 
 public class GradientUtil
 {
-
     private const int Steps = 16;
+    private static readonly Dictionary<GradientType, Color[]> _baseGradientColors = new();
 
     public enum GradientType : ushort
     {
@@ -19,28 +19,45 @@ public class GradientUtil
         Custom
     }
 
-    public static Gradient BuildGradient(GradientType type, float hueOffset, bool forceRandomRebuild = false)
+    public static Gradient BuildGradient(GradientType type, float hueOffset, Gradient? savedRandomGradient = null)
     {
-        if (forceRandomRebuild && type == GradientType.Random)
+        if (type == GradientType.Random)
         {
+            if (savedRandomGradient is not null)
+            {
+                return BuildKeyframeFromGradientColors(savedRandomGradient, hueOffset);
+            }
+
+            // Generate new random - don't cache it since it should be ephemeral
             return BuildKeyframeGradient(hueOffset, BuildRandomColors((int)Config.RandomGradientSize));
         }
-        if (Config.GetSavedRandomGradient() is not null && type == GradientType.Random)
+    
+        // Cache these values as used because they will never change
+        if (!_baseGradientColors.TryGetValue(type, out var baseColors))
         {
-            return BuildKeyframeFromGradientColors(Config.GetSavedRandomGradient(), hueOffset);
-        }
+            baseColors = type switch
+            {
+                GradientType.Fire => GradientsPresets.FireColors,
+                GradientType.Ocean => GradientsPresets.OceanColors,
+                GradientType.Monochrome => GradientsPresets.MonoColors,
+                GradientType.Christmas => GradientsPresets.ChristmasColors,
+                GradientType.Spring => GradientsPresets.SpringColors,
+                GradientType.Rainbow => null, // Handled differently
+                GradientType.Custom => null,  // same
+                _ => null
+            };
         
-        return Config.GradientType switch
-        {
-            GradientType.Fire => BuildKeyframeGradient(hueOffset, GradientsPresets.FireColors),
-            GradientType.Ocean => BuildKeyframeGradient(hueOffset, GradientsPresets.OceanColors),
-            GradientType.Monochrome => BuildKeyframeGradient(hueOffset, GradientsPresets.MonoColors),
-            GradientType.Christmas => BuildKeyframeGradient(hueOffset, GradientsPresets.ChristmasColors),
-            GradientType.Spring => BuildKeyframeGradient(hueOffset, GradientsPresets.SpringColors),
-            GradientType.Random => BuildKeyframeGradient(hueOffset, BuildRandomColors((int)Config.RandomGradientSize)),
-            GradientType.Custom => BuildKeyframeCustomGradient(hueOffset),
-            GradientType.Rainbow => BuildRainbowGradient(hueOffset)
-        };
+            if (baseColors != null)
+                _baseGradientColors[type] = baseColors;
+        }
+    
+        if (type == GradientType.Rainbow)
+            return BuildRainbowGradient(hueOffset);
+    
+        if (type == GradientType.Custom)
+            return BuildKeyframeCustomGradient(hueOffset);
+    
+        return BuildKeyframeGradient(hueOffset, baseColors);
     }
 
     private static Gradient BuildKeyframeGradient(float hueOffset, Color[] keyColors)

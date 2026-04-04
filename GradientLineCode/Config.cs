@@ -49,7 +49,7 @@ public class Config : SimpleModConfig
         GradientPreviewControl gradientPreview = new GradientPreviewControl();
         gradientPreview.CustomMinimumSize = new Vector2(120, 16);
         
-        // Save the gradient made here for if they use the random option
+        // Save the gradient as a static object for if they use the random option
         _savedRandomGradient = GradientUtil.BuildGradient(GradientType, _previewHueOffset);
         gradientPreview.SetGradient(_savedRandomGradient);
         
@@ -71,7 +71,7 @@ public class Config : SimpleModConfig
 
             if (shouldRebuildGradient)
             {
-                _savedRandomGradient = GradientUtil.BuildGradient(GradientType, _previewHueOffset, true);
+                _savedRandomGradient = GradientUtil.BuildGradient(GradientType, _previewHueOffset);
                 gradientPreview.SetGradient(_savedRandomGradient);
             }
         };
