@@ -5,7 +5,7 @@ namespace GradientLine.GradientLineCode;
 public class GradientUtil
 {
     private const int Steps = 16;
-    private static readonly Dictionary<GradientType, Color[]> _baseGradientColors = new();
+    private static readonly Dictionary<GradientType, Color[]> BaseGradientColorsCache = new();
 
     public enum GradientType : ushort
     {
@@ -19,21 +19,20 @@ public class GradientUtil
         Custom
     }
 
-    public static Gradient BuildGradient(GradientType type, float hueOffset, Gradient? savedRandomGradient = null)
+    public static Gradient BuildGradient(GradientType type, float hueOffset, Gradient? savedRandomGradient = null, bool reRandomize = false)
     {
         if (type == GradientType.Random)
         {
-            if (savedRandomGradient is not null)
+            if (savedRandomGradient is null || reRandomize)
             {
-                return BuildKeyframeFromGradientColors(savedRandomGradient, hueOffset);
+                // Generate new random - don't cache it since it should be ephemeral
+                return BuildKeyframeGradient(hueOffset, BuildRandomColors((int)Config.RandomGradientSize));
             }
-
-            // Generate new random - don't cache it since it should be ephemeral
-            return BuildKeyframeGradient(hueOffset, BuildRandomColors((int)Config.RandomGradientSize));
+            return BuildKeyframeFromGradientColors(savedRandomGradient, hueOffset);
         }
     
         // Cache these values as used because they will never change
-        if (!_baseGradientColors.TryGetValue(type, out var baseColors))
+        if (!BaseGradientColorsCache.TryGetValue(type, out var baseColors))
         {
             baseColors = type switch
             {
@@ -48,7 +47,7 @@ public class GradientUtil
             };
         
             if (baseColors != null)
-                _baseGradientColors[type] = baseColors;
+                BaseGradientColorsCache[type] = baseColors;
         }
     
         if (type == GradientType.Rainbow)
@@ -123,7 +122,22 @@ public class GradientUtil
                 (float)rng.NextDouble()
             );
         }
-        
+
+        float maxDelta = (float)Config.Randomness;
+
+        if (maxDelta != 1f)
+        {
+            for (int i = 1; i < size; i++)
+            {
+                Color prev = colors[i - 1];
+                colors[i] = new Color(
+                    Mathf.Clamp(prev.R + ((float)rng.NextDouble() - 0.5f) * 2 * maxDelta, 0f, 1f),
+                    Mathf.Clamp(prev.G + ((float)rng.NextDouble() - 0.5f) * 2 * maxDelta, 0f, 1f),
+                    Mathf.Clamp(prev.B + ((float)rng.NextDouble() - 0.5f) * 2 * maxDelta, 0f, 1f)
+                );
+            }
+        }
+
         colors[size] = colors[0]; // Make last the same as the first so it looks nicer
         return colors;
     }

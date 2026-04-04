@@ -9,8 +9,10 @@ namespace GradientLine.GradientLineCode;
 
 public class GradientLinePatches
 {
+    private const double AnimationDivisor = 5000.0;
+
     [HarmonyPatch(typeof(NMapDrawings), "CreateLineForPlayer")]
-    public static class SetGradientPatch
+    public static class Agogagaba
     {
         [HarmonyPostfix]
         static void Postfix(NMapDrawings __instance, Player player, bool isErasing, ref Line2D __result)
@@ -18,71 +20,150 @@ public class GradientLinePatches
             if (__result == null || isErasing) return;
             
             ulong playerId = player.NetId;
-            
-            // If we don't want to randomize the starting offset or are using random gradient type, this returns 0f
-            float startingHue =
-                (Config.RandomizeStartOffset && Config.GradientType != GradientUtil.GradientType.Random)
-                    ? GD.Randf()
-                    : 0f;            
+            float startingHue = CalculateStartingHue();
             
             if (MultiplayerManager.IsLocalPlayer(playerId))
             {
-                if (Config.GradientType == GradientUtil.GradientType.Random)
-                    __result.Gradient = Config.GetSavedRandomGradient();
-                
-                else
-                     __result.Gradient = GradientUtil.BuildGradient(Config.GradientType, startingHue);
-                
-                MultiplayerManager.BroadcastLineStart(startingHue);
+                HandleLocalPlayerLine(__result, startingHue);
             }
             else
             {
-                float remoteHue = MultiplayerManager.GetCurrentLineHue(playerId);
-                GradientUtil.GradientType gradientType = MultiplayerManager.GetPlayerGradientType(playerId);
-
-                if (gradientType == GradientUtil.GradientType.Random)
-                {
-                    __result.Gradient = MultiplayerManager.GetPlayerGradient(playerId);
-                }
-                else
-                {
-                    __result.Gradient = GradientUtil.BuildGradient(gradientType, remoteHue);
-                }
+                HandleRemotePlayerLine(__result, playerId);
             }
+        }
+
+        private static float CalculateStartingHue()
+        {
+            // If we don't want to randomize the starting offset or are using random gradient type, this returns 0f
+            bool shouldRandomize = Config.RandomizeStartOffset 
+                                && Config.GradientType != GradientUtil.GradientType.Random;
+            return shouldRandomize ? GD.Randf() : 0f;
+        }
+
+        private static void HandleLocalPlayerLine(Line2D line, float startingHue)
+        {
+            line.Gradient = GradientUtil.BuildGradient(
+                Config.GradientType, 
+                startingHue, 
+                Config.GetSavedRandomGradient(), 
+                Config.RandomizeEachLine
+            );
+
+            bool isRandomWithReroll = Config.GradientType == GradientUtil.GradientType.Random 
+                                   && Config.RandomizeEachLine;
+            
+            if (isRandomWithReroll)
+            {
+                Config.SetSavedRandomGradient(line.Gradient);
+                MultiplayerManager.BroadcastGradient();
+            }
+
+            MultiplayerManager.BroadcastLineStart(startingHue);
+        }
+
+        private static void HandleRemotePlayerLine(Line2D line, ulong playerId)
+        {
+            float remoteHue = MultiplayerManager.GetCurrentLineHue(playerId);
+            GradientUtil.GradientType gradientType = MultiplayerManager.GetPlayerGradientType(playerId);
+
+            line.Gradient = BuildRemoteGradient(gradientType, remoteHue, playerId);
+        }
+
+        private static Gradient BuildRemoteGradient(
+            GradientUtil.GradientType gradientType, 
+            float hueOffset, 
+            ulong playerId)
+        {
+            if (gradientType == GradientUtil.GradientType.Random)
+            {
+                return MultiplayerManager.GetPlayerGradient(playerId);
+            }
+            
+            return GradientUtil.BuildGradient(gradientType, hueOffset);
         }
     }
 
     [HarmonyPatch(typeof(NMapDrawings), "UpdateCurrentLinePosition")]
-    public static class UpdateGradientPatch
+    public static class Updoop
     {
         [HarmonyPostfix]
         static void Postfix(NMapDrawings __instance, object state, Vector2 position)
         {
-            if (!Config.Animate)
-                return;
+            if (!Config.Animate) return;
             
-            ulong netId = Traverse.Create(state).Field("playerId").GetValue<ulong>();
-            var line = Traverse.Create(state).Field("currentlyDrawingLine").GetValue<Line2D>();
-            if (!GodotObject.IsInstanceValid(line) || line.Gradient == null) return;
+            var lineState = ExtractLineState(state);
+            if (!lineState.IsValid) return;
             
-            float currentLineHue = MultiplayerManager.GetCurrentLineHue(netId);
-            float hueOffset = currentLineHue + (float)(line.GetPointCount() * Config.AnimateSpeed / 5000.0) % 1f;
+            float animatedHueOffset = CalculateAnimatedHueOffset(
+                lineState.PlayerId, 
+                lineState.Line
+            );
             
-            if (MultiplayerManager.IsLocalPlayer(netId))
+            if (MultiplayerManager.IsLocalPlayer(lineState.PlayerId))
             {
-                line.Gradient = GradientUtil.BuildGradient(Config.GradientType, hueOffset, Config.GetSavedRandomGradient());
+                UpdateLocalPlayerLine(lineState.Line, animatedHueOffset);
             }
             else
             {
-                GradientUtil.GradientType gradientType = MultiplayerManager.GetPlayerGradientType(netId);
-                if (gradientType == GradientUtil.GradientType.Random)
-                {
-                    line.Gradient = GradientUtil.BuildKeyframeFromGradientColors(MultiplayerManager.GetPlayerGradient(netId), hueOffset);
-                }
-                else
-                {
-                    line.Gradient = GradientUtil.BuildGradient(gradientType, hueOffset);
-                }
+                UpdateRemotePlayerLine(lineState.Line, lineState.PlayerId, animatedHueOffset);
+            }
+        }
+
+        private static LineState ExtractLineState(object state)
+        {
+            var traverse = Traverse.Create(state);
+            ulong playerId = traverse.Field("playerId").GetValue<ulong>();
+            var line = traverse.Field("currentlyDrawingLine").GetValue<Line2D>();
+            
+            bool isValid = GodotObject.IsInstanceValid(line) && line.Gradient != null;
+            
+            return new LineState(playerId, line, isValid);
+        }
+
+        private static float CalculateAnimatedHueOffset(ulong playerId, Line2D line)
+        {
+            float currentLineHue = MultiplayerManager.GetCurrentLineHue(playerId);
+            float animationProgress = (float)(line.GetPointCount() * Config.AnimateSpeed / AnimationDivisor);
+            return (currentLineHue + animationProgress) % 1f;
+        }
+
+        private static void UpdateLocalPlayerLine(Line2D line, float hueOffset)
+        {
+            line.Gradient = GradientUtil.BuildGradient(
+                Config.GradientType, 
+                hueOffset, 
+                Config.GetSavedRandomGradient()
+            );
+        }
+
+        private static void UpdateRemotePlayerLine(Line2D line, ulong playerId, float hueOffset)
+        {
+            GradientUtil.GradientType gradientType = MultiplayerManager.GetPlayerGradientType(playerId);
+            
+            if (gradientType == GradientUtil.GradientType.Random)
+            {
+                line.Gradient = GradientUtil.BuildKeyframeFromGradientColors(
+                    MultiplayerManager.GetPlayerGradient(playerId), 
+                    hueOffset
+                );
+            }
+            else
+            {
+                line.Gradient = GradientUtil.BuildGradient(gradientType, hueOffset);
+            }
+        }
+
+        private readonly struct LineState
+        {
+            public ulong PlayerId { get; }
+            public Line2D Line { get; }
+            public bool IsValid { get; }
+
+            public LineState(ulong playerId, Line2D line, bool isValid)
+            {
+                PlayerId = playerId;
+                Line = line;
+                IsValid = isValid;
             }
         }
     }

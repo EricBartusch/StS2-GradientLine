@@ -8,6 +8,7 @@ A mod for **Slay the Spire 2** that replaces the plain-colored freehand map draw
 - **Custom palette** - define your own gradient using up to 10 hex color codes
 - **Live preview** of the selected gradient in the mod settings UI
 - **Multiplayer support** - each player's gradient preferences are synced across clients
+- **Random gradient** - can be random each line drawn or the same pregenerated random gradient
 
 ## Requirements
 
@@ -25,11 +26,27 @@ All settings are available in-game through the mod settings menu:
 
 | Setting | Default | Description |
 |---|---|---|
-| Gradient | Rainbow | Which gradient preset to use |
-| Animate the color while drawing | On | Whether the gradient shifts as you draw |
-| Animation Speed | 120 | Controls how fast the hue shifts (higher = slower); range 30–200 |
-| Randomize Start Offset | On | Whether each line starts with a random hue |
-| Custom Gradient Colors | _(empty)_ | Up to 10 hex color codes, each prefixed with `#` (e.g. `#FF0000#00FF00#0000FF`) |
+| **Gradient Type** | Rainbow | Choose from: Rainbow, Fire, Ocean, Monochrome, Christmas, Spring, Random, or Custom |
+| **Animate** | On | Whether the gradient shifts/animates as you draw |
+| **Randomize Start Offset** | On | Whether each line starts with a random position in the gradient |
+| **Animation Speed** | 120 | Controls how fast the gradient shifts while drawing (range: 30–200, higher = faster) |
+
+### Custom Gradient Settings
+*(Only visible when Gradient Type is set to "Custom")*
+
+| Setting | Default | Description |
+|---|---|---|
+| **Custom Colors** | _(empty)_ | Up to 10 hex color codes, each prefixed with `#` (e.g. `#FF0000#00FF00#0000FF`) |
+
+### Random Gradient Settings
+*(Only visible when Gradient Type is set to "Random")*
+
+| Setting | Default | Description |
+|---|---|---|
+| **Random Gradient Size** | 5 | Number of color keyframes in the random gradient (range: 2–10) |
+| **Randomize Each Line** | Off | Generate a new random gradient for every line drawn |
+| **Randomness** | 1.0 | Controls color smoothness (range: 0.1–1.0). Lower values = smoother transitions between colors, higher values = more chaotic/vibrant |
+| **Reroll Random** | _(button)_ | Generate a new random gradient immediately |
 
 A live gradient preview strip updates in real time as you change settings.
 
@@ -92,15 +109,17 @@ public static Gradient BuildGradient(float hueOffset)
     return Config.GradientType switch
     {
         // ...
-        GradientType.YourPreset => BuildKeyframeGradient(hueOffset, YourPresetColors),
-        // ...
+        GradientType.Christmas => GradientsPresets.ChristmasColors,
+        GradientType.Spring => GradientsPresets.SpringColors,
+        GradientType.YourPreset => GradientsPresets.YourPresetColors,
+        GradientType.Rainbow => null, // Handled differently
+        GradientType.Custom => null,  // same
+        _ => null
     };
 }
 ```
 
 ## TODO
 - Color picker for custom colors
-- Hide custom color row when not selecting custom color
 - Make erasing better
 - Allow gradient to repeat
-- Random gradient for each individual line setting
