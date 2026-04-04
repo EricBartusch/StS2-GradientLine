@@ -31,6 +31,7 @@ public class Config : SimpleModConfig
     private double _lastRandomGradientSize;
     private GradientUtil.GradientType _lastGradientType;
     private GradientPreviewControl _gradientPreview;
+    private string _lastCustomColors;
     
     private static Gradient? _savedRandomGradient;
     public static Gradient? GetSavedRandomGradient() => _savedRandomGradient;
@@ -42,6 +43,7 @@ public class Config : SimpleModConfig
         
         _wasRandomizeEnabled = RandomizeStartOffset;
         _lastGradientType = GradientType;
+        _lastCustomColors = CustomColors;
         _lastRandomGradientSize = RandomGradientSize;
         _previewHueOffset = RandomizeStartOffset ? GD.Randf() : 0f;
         
@@ -67,7 +69,8 @@ public class Config : SimpleModConfig
 
             bool gradientChanged = GradientType != _lastGradientType;
             bool randomSizeChanged = RandomGradientSize != _lastRandomGradientSize;
-            bool shouldRebuildGradient = gradientChanged || randomSizeChanged || _wasRandomizeEnabled != RandomizeStartOffset;
+            bool customColorsChanged = CustomColors != _lastCustomColors;
+            bool shouldRebuildGradient = customColorsChanged || gradientChanged || randomSizeChanged || _wasRandomizeEnabled != RandomizeStartOffset;
 
             UpdatePreviewOffset(gradientChanged);
 
@@ -75,6 +78,7 @@ public class Config : SimpleModConfig
             _wasRandomizeEnabled = RandomizeStartOffset;
             _lastGradientType = GradientType;
             _lastRandomGradientSize = RandomGradientSize;
+            _lastCustomColors = CustomColors;
 
             if (shouldRebuildGradient)
             {
