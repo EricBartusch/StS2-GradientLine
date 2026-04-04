@@ -18,17 +18,23 @@ public class Config : SimpleModConfig
     [SliderRange(2, 10)]
     public static double RandomGradientSize { get; set; } = 5;
 
+    [ConfigButton("RerollRandom")]
+    public void RerollRandom()
+    {
+        _savedRandomGradient = GradientUtil.BuildGradient(GradientType, _previewHueOffset);
+        _gradientPreview.SetGradient(_savedRandomGradient);
+    }
+    
     private readonly List<EventHandler> _configChangedHandlers = [];
     private static float _previewHueOffset;
     private bool _wasRandomizeEnabled;
     private double _lastRandomGradientSize;
     private GradientUtil.GradientType _lastGradientType;
+    private GradientPreviewControl _gradientPreview;
     
     private static Gradient? _savedRandomGradient;
     public static Gradient? GetSavedRandomGradient() => _savedRandomGradient;
     public static void SetSavedRandomGradient(Gradient? gradient) => _savedRandomGradient = gradient;
-
-
     
     public override void SetupConfigUI(Control optionContainer)
     {
@@ -40,11 +46,11 @@ public class Config : SimpleModConfig
         _previewHueOffset = RandomizeStartOffset ? GD.Randf() : 0f;
         
         GenerateOptionsForAllProperties(optionContainer);
-        AddGradientPreview(optionContainer);
+        _gradientPreview = AddGradientPreview(optionContainer);
         AddRestoreDefaultsButton(optionContainer);
     }
 
-    private void AddGradientPreview(Control optionContainer)
+    private GradientPreviewControl AddGradientPreview(Control optionContainer)
     {
         GradientPreviewControl gradientPreview = new GradientPreviewControl();
         gradientPreview.CustomMinimumSize = new Vector2(120, 16);
@@ -52,6 +58,7 @@ public class Config : SimpleModConfig
         // Save the gradient as a static object for if they use the random option
         _savedRandomGradient = GradientUtil.BuildGradient(GradientType, _previewHueOffset);
         gradientPreview.SetGradient(_savedRandomGradient);
+        gradientPreview.SetAnimate(Animate);
         
         EventHandler gradientUpdateHandler = (sender, args) =>
         {
@@ -74,6 +81,8 @@ public class Config : SimpleModConfig
                 _savedRandomGradient = GradientUtil.BuildGradient(GradientType, _previewHueOffset);
                 gradientPreview.SetGradient(_savedRandomGradient);
             }
+            
+            gradientPreview.SetAnimate(Animate);
         };
         
         ConfigChanged += gradientUpdateHandler;
@@ -83,6 +92,8 @@ public class Config : SimpleModConfig
         
         optionContainer.AddChild(CreateSectionHeader("Preview"));
         optionContainer.AddChild(gradientPreview);
+        
+        return gradientPreview;
     }
 
     private void UpdatePreviewOffset(bool gradientChanged)
