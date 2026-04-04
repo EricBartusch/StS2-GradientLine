@@ -23,6 +23,11 @@ public class Config : SimpleModConfig
     private bool _wasRandomizeEnabled;
     private double _lastRandomGradientSize;
     private GradientUtil.GradientType _lastGradientType;
+    
+    private static Gradient? _savedRandomGradient;
+    public static Gradient? GetSavedRandomGradient() => _savedRandomGradient;
+    public static void SetSavedRandomGradient(Gradient? gradient) => _savedRandomGradient = gradient;
+
 
     
     public override void SetupConfigUI(Control optionContainer)
@@ -45,8 +50,8 @@ public class Config : SimpleModConfig
         gradientPreview.CustomMinimumSize = new Vector2(120, 16);
         
         // Save the gradient made here for if they use the random option
-        GradientUtil.CreatedGradient = GradientUtil.BuildGradient(GradientType, _previewHueOffset);
-        gradientPreview.SetGradient(GradientUtil.CreatedGradient);
+        _savedRandomGradient = GradientUtil.BuildGradient(GradientType, _previewHueOffset);
+        gradientPreview.SetGradient(_savedRandomGradient);
         
         EventHandler gradientUpdateHandler = (sender, args) =>
         {
@@ -66,8 +71,8 @@ public class Config : SimpleModConfig
 
             if (shouldRebuildGradient)
             {
-                GradientUtil.CreatedGradient = GradientUtil.BuildGradient(GradientType, _previewHueOffset, true);
-                gradientPreview.SetGradient(GradientUtil.CreatedGradient);
+                _savedRandomGradient = GradientUtil.BuildGradient(GradientType, _previewHueOffset, true);
+                gradientPreview.SetGradient(_savedRandomGradient);
             }
         };
         
@@ -107,4 +112,5 @@ public class Config : SimpleModConfig
         
         _configChangedHandlers.Clear();
     }
+
 }

@@ -28,7 +28,7 @@ public class GradientLinePatches
             if (MultiplayerManager.IsLocalPlayer(playerId))
             {
                 if (Config.GradientType == GradientUtil.GradientType.Random)
-                    __result.Gradient = GradientUtil.CreatedGradient;
+                    __result.Gradient = Config.GetSavedRandomGradient();
                 
                 else
                      __result.Gradient = GradientUtil.BuildGradient(Config.GradientType, startingHue);

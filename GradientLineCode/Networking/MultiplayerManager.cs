@@ -46,17 +46,16 @@ public static class MultiplayerManager
             return;
         }
 
-        if (GradientUtil.CreatedGradient is null)
+        if (Config.GetSavedRandomGradient() is null)
         {
-            GradientUtil.CreatedGradient =
-                GradientUtil.BuildGradient(GradientUtil.GradientType.Random, Config.GetPreviewHueOffset());
+            Config.SetSavedRandomGradient(GradientUtil.BuildGradient(GradientUtil.GradientType.Random, Config.GetPreviewHueOffset()));
         }
 
         var message = new GradientMessage()
         {
             PlayerId = _localPlayerId,
-            Colors = GradientUtil.CreatedGradient?.Colors,
-            Offsets = GradientUtil.CreatedGradient?.Offsets
+            Colors = Config.GetSavedRandomGradient()?.Colors,
+            Offsets = Config.GetSavedRandomGradient()?.Offsets
         };
         
         _netGameService.SendMessage(message);

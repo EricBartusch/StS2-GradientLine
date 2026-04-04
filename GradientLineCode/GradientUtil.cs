@@ -6,7 +6,7 @@ public class GradientUtil
 {
 
     private const int Steps = 16;
-    public static Gradient? CreatedGradient;
+
     public enum GradientType : ushort
     {
         Rainbow,
@@ -25,9 +25,9 @@ public class GradientUtil
         {
             return BuildKeyframeGradient(hueOffset, BuildRandomColors((int)Config.RandomGradientSize));
         }
-        if (CreatedGradient is not null && type == GradientType.Random)
+        if (Config.GetSavedRandomGradient() is not null && type == GradientType.Random)
         {
-            return BuildKeyframeFromGradientColors(CreatedGradient, hueOffset);
+            return BuildKeyframeFromGradientColors(Config.GetSavedRandomGradient(), hueOffset);
         }
         
         return Config.GradientType switch
