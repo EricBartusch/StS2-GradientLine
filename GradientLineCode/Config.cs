@@ -22,6 +22,10 @@ public class Config : SimpleModConfig
     public static double RandomGradientSize { get; set; } = 5;
     [ConfigVisibleWhen(nameof(GradientType), GradientUtil.GradientType.Random)]
     public static bool RandomizeEachLine { get; set; } = false;
+    
+    [ConfigVisibleWhen(nameof(GradientType), GradientUtil.GradientType.Random)]
+    [SliderRange(0.1, 1, 0.1)]
+    public static double Randomness { get; set; } = 1f;
 
     [ConfigVisibleWhen(nameof(GradientType), GradientUtil.GradientType.Random)]
     [ConfigButton("RerollRandom")]
@@ -38,6 +42,7 @@ public class Config : SimpleModConfig
     private GradientUtil.GradientType _lastGradientType;
     private GradientPreviewControl _gradientPreview;
     private string _lastCustomColors;
+    private double _lastRandomness;
     
     private static Gradient? _savedRandomGradient;
     public static Gradient? GetSavedRandomGradient() => _savedRandomGradient;
@@ -52,6 +57,7 @@ public class Config : SimpleModConfig
         _lastCustomColors = CustomColors;
         _lastRandomGradientSize = RandomGradientSize;
         _previewHueOffset = RandomizeStartOffset ? GD.Randf() : 0f;
+        _lastRandomness = Randomness;
         
         GenerateOptionsForAllProperties(optionContainer);
         _gradientPreview = AddGradientPreview(optionContainer);
@@ -76,7 +82,8 @@ public class Config : SimpleModConfig
             bool gradientChanged = GradientType != _lastGradientType;
             bool randomSizeChanged = RandomGradientSize != _lastRandomGradientSize;
             bool customColorsChanged = CustomColors != _lastCustomColors;
-            bool shouldRebuildGradient = customColorsChanged || gradientChanged || randomSizeChanged || _wasRandomizeEnabled != RandomizeStartOffset;
+            bool randomnessChanged =  Randomness != _lastRandomness;
+            bool shouldRebuildGradient = randomnessChanged || customColorsChanged || gradientChanged || randomSizeChanged || _wasRandomizeEnabled != RandomizeStartOffset;
 
             UpdatePreviewOffset(gradientChanged);
 
@@ -85,6 +92,7 @@ public class Config : SimpleModConfig
             _lastGradientType = GradientType;
             _lastRandomGradientSize = RandomGradientSize;
             _lastCustomColors = CustomColors;
+            _lastRandomness = Randomness;
 
             if (shouldRebuildGradient)
             {

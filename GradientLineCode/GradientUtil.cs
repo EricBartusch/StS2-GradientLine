@@ -122,7 +122,22 @@ public class GradientUtil
                 (float)rng.NextDouble()
             );
         }
-        
+
+        float maxDelta = (float)Config.Randomness;
+
+        if (maxDelta != 1f)
+        {
+            for (int i = 1; i < size; i++)
+            {
+                Color prev = colors[i - 1];
+                colors[i] = new Color(
+                    Mathf.Clamp(prev.R + ((float)rng.NextDouble() - 0.5f) * 2 * maxDelta, 0f, 1f),
+                    Mathf.Clamp(prev.G + ((float)rng.NextDouble() - 0.5f) * 2 * maxDelta, 0f, 1f),
+                    Mathf.Clamp(prev.B + ((float)rng.NextDouble() - 0.5f) * 2 * maxDelta, 0f, 1f)
+                );
+            }
+        }
+
         colors[size] = colors[0]; // Make last the same as the first so it looks nicer
         return colors;
     }
