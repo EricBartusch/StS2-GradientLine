@@ -60,7 +60,7 @@ public class Config : SimpleModConfig
 
             bool gradientChanged = GradientType != _lastGradientType;
             bool randomSizeChanged = RandomGradientSize != _lastRandomGradientSize;
-            bool shouldRebuildGradient = gradientChanged || randomSizeChanged;
+            bool shouldRebuildGradient = gradientChanged || randomSizeChanged || _wasRandomizeEnabled != RandomizeStartOffset;
 
             UpdatePreviewOffset(gradientChanged);
 
