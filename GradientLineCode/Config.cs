@@ -31,6 +31,7 @@ public class Config : SimpleModConfig
         
         _wasRandomizeEnabled = RandomizeStartOffset;
         _lastGradientType = GradientType;
+        _lastRandomGradientSize = RandomGradientSize;
         _previewHueOffset = RandomizeStartOffset ? GD.Randf() : 0f;
         
         GenerateOptionsForAllProperties(optionContainer);
@@ -49,28 +50,23 @@ public class Config : SimpleModConfig
         
         EventHandler gradientUpdateHandler = (sender, args) =>
         {
-            if (!GodotObject.IsInstanceValid(gradientPreview))
+            if (!GodotObject.IsInstanceValid(gradientPreview) || !gradientPreview.IsInsideTree())
                 return;
 
-            if (!gradientPreview.IsInsideTree())
-                return;
+            bool gradientChanged = GradientType != _lastGradientType;
+            bool randomSizeChanged = RandomGradientSize != _lastRandomGradientSize;
+            bool shouldRebuildGradient = gradientChanged || randomSizeChanged;
 
-            bool shouldRebuildGradient = ShouldRebuildGradient();
-
-            MaybeSometimesUpdatePreviewOffset();
+            UpdatePreviewOffset(gradientChanged);
 
             // Update tracking state
             _wasRandomizeEnabled = RandomizeStartOffset;
-            bool reselectedRandom =
-                GradientType == GradientUtil.GradientType.Random &&
-                _lastGradientType == GradientUtil.GradientType.Random;
             _lastGradientType = GradientType;
             _lastRandomGradientSize = RandomGradientSize;
 
-            if (shouldRebuildGradient || reselectedRandom)
+            if (shouldRebuildGradient)
             {
-                GradientUtil.CreatedGradient = null;
-                GradientUtil.CreatedGradient = GradientUtil.BuildGradient(GradientType, _previewHueOffset);
+                GradientUtil.CreatedGradient = GradientUtil.BuildGradient(GradientType, _previewHueOffset, true);
                 gradientPreview.SetGradient(GradientUtil.CreatedGradient);
             }
         };
@@ -84,37 +80,19 @@ public class Config : SimpleModConfig
         optionContainer.AddChild(gradientPreview);
     }
 
-    // This is gross so it's here.
-    // Basically only update the preview if toggling between randomizing the starting hue or not
-    // or when the gradient gets changed
-    private void MaybeSometimesUpdatePreviewOffset()
+    private void UpdatePreviewOffset(bool gradientChanged)
     {
-        // Check if randomize was just turned on
         bool randomizeJustEnabled = RandomizeStartOffset && !_wasRandomizeEnabled;
-            
-        // Check if gradient type changed
-        bool gradientTypeChanged = GradientType != _lastGradientType;
-            
-        // Regenerate offset if randomize is on AND (it was just enabled OR gradient type changed)
-        if (RandomizeStartOffset && (randomizeJustEnabled || gradientTypeChanged))
-        {
-            _previewHueOffset = GD.Randf();
-        }
-        // If randomize was turned off, reset to 0
-        else if (!RandomizeStartOffset && _wasRandomizeEnabled)
+        bool randomizeJustDisabled = !RandomizeStartOffset && _wasRandomizeEnabled;
+        
+        if (randomizeJustDisabled)
         {
             _previewHueOffset = 0f;
         }
-        // Otherwise keep the existing offset
-    }
-    
-    // Random gradient should only be regenerated if the gradient or the amount of colors in the gradient changed
-    private bool ShouldRebuildGradient()
-    {
-        bool gradientTypeChanged = GradientType != _lastGradientType;
-        bool customColorsChanged = RandomGradientSize != _lastRandomGradientSize;
-
-        return gradientTypeChanged || customColorsChanged;
+        else if (RandomizeStartOffset && (randomizeJustEnabled || gradientChanged))
+        {
+            _previewHueOffset = GD.Randf();
+        }
     }
 
     public static float GetPreviewHueOffset()

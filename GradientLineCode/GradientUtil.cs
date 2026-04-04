@@ -19,8 +19,12 @@ public class GradientUtil
         Custom
     }
 
-    public static Gradient BuildGradient(GradientType type, float hueOffset)
+    public static Gradient BuildGradient(GradientType type, float hueOffset, bool forceRandomRebuild = false)
     {
+        if (forceRandomRebuild && type == GradientType.Random)
+        {
+            return BuildKeyframeGradient(hueOffset, BuildRandomColors((int)Config.RandomGradientSize));
+        }
         if (CreatedGradient is not null && type == GradientType.Random)
         {
             return BuildKeyframeFromGradientColors(CreatedGradient, hueOffset);
