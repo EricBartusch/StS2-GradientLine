@@ -19,8 +19,13 @@ public class GradientUtil
         Custom
     }
 
-    public static Gradient BuildGradientFromConfig(float hueOffset)
+    public static Gradient BuildGradient(GradientType type, float hueOffset)
     {
+        if (CreatedGradient is not null && type == GradientType.Random)
+        {
+            return BuildKeyframeFromGradientColors(CreatedGradient, hueOffset);
+        }
+        
         return Config.GradientType switch
         {
             GradientType.Fire => BuildKeyframeGradient(hueOffset, GradientsPresets.FireColors),
@@ -28,22 +33,7 @@ public class GradientUtil
             GradientType.Monochrome => BuildKeyframeGradient(hueOffset, GradientsPresets.MonoColors),
             GradientType.Christmas => BuildKeyframeGradient(hueOffset, GradientsPresets.ChristmasColors),
             GradientType.Spring => BuildKeyframeGradient(hueOffset, GradientsPresets.SpringColors),
-            GradientType.Random => BuildKeyframeGradient(0f, BuildRandomColors((int)Config.RandomGradientSize)),
-            GradientType.Custom => BuildKeyframeCustomGradient(hueOffset),
-            GradientType.Rainbow => BuildRainbowGradient(hueOffset)
-        };
-    }
-    
-    public static Gradient BuildSpecificGradient(GradientType type, float hueOffset)
-    {
-        return type switch
-        {
-            GradientType.Fire => BuildKeyframeGradient(hueOffset, GradientsPresets.FireColors),
-            GradientType.Ocean => BuildKeyframeGradient(hueOffset, GradientsPresets.OceanColors),
-            GradientType.Monochrome => BuildKeyframeGradient(hueOffset, GradientsPresets.MonoColors),
-            GradientType.Christmas => BuildKeyframeGradient(hueOffset, GradientsPresets.ChristmasColors),
-            GradientType.Spring => BuildKeyframeGradient(hueOffset, GradientsPresets.SpringColors),
-            GradientType.Random => BuildKeyframeGradient(0f, BuildRandomColors((int)Config.RandomGradientSize)),
+            GradientType.Random => BuildKeyframeGradient(hueOffset, BuildRandomColors((int)Config.RandomGradientSize)),
             GradientType.Custom => BuildKeyframeCustomGradient(hueOffset),
             GradientType.Rainbow => BuildRainbowGradient(hueOffset)
         };
@@ -79,6 +69,11 @@ public class GradientUtil
             .ToArray();
         
         return BuildKeyframeGradient(hueOffset, colors);
+    }
+    
+    public static Gradient BuildKeyframeFromGradientColors(Gradient gradient, float hueOffset)
+    {
+        return BuildKeyframeGradient(hueOffset, gradient.Colors);
     }
 
     private static Gradient BuildRainbowGradient(float hueOffset)

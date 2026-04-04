@@ -20,6 +20,7 @@ public static class MultiplayerManager
         _localPlayerId = netGameService.NetId;
         netGameService.RegisterMessageHandler<GradientTypeMessage>(OnGradientMessageReceived);
         netGameService.RegisterMessageHandler<LineStartMessage>(OnLineStartMessageReceived);
+        netGameService.RegisterMessageHandler<GradientMessage>(OnGradientMessageReceived);
     }
     
     public static void BroadcastGradientType()
@@ -43,6 +44,12 @@ public static class MultiplayerManager
         if (_localPlayerId == 0 || _netGameService == null)
         {
             return;
+        }
+
+        if (GradientUtil.CreatedGradient is null)
+        {
+            GradientUtil.CreatedGradient =
+                GradientUtil.BuildGradient(GradientUtil.GradientType.Random, Config.GetPreviewHueOffset());
         }
 
         var message = new GradientMessage()
@@ -91,7 +98,7 @@ public static class MultiplayerManager
     {
         return _playerGradients.TryGetValue(playerId, out var type) 
             ? type 
-            : GradientUtil.BuildSpecificGradient(GradientUtil.GradientType.Rainbow, 0f);
+            : GradientUtil.BuildGradient(GradientUtil.GradientType.Rainbow, 0f);
     }
     
     public static bool IsLocalPlayer(ulong playerId)

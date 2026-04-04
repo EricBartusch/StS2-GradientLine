@@ -31,7 +31,7 @@ public class GradientLinePatches
                     __result.Gradient = GradientUtil.CreatedGradient;
                 
                 else
-                     __result.Gradient = GradientUtil.BuildGradientFromConfig(startingHue);
+                     __result.Gradient = GradientUtil.BuildGradient(Config.GradientType, startingHue);
                 
                 MultiplayerManager.BroadcastLineStart(startingHue);
             }
@@ -46,7 +46,7 @@ public class GradientLinePatches
                 }
                 else
                 {
-                    __result.Gradient = GradientUtil.BuildSpecificGradient(gradientType, remoteHue);
+                    __result.Gradient = GradientUtil.BuildGradient(gradientType, remoteHue);
                 }
             }
         }
@@ -70,22 +70,18 @@ public class GradientLinePatches
 
             if (MultiplayerManager.IsLocalPlayer(netId))
             {
-                if (Config.GradientType == GradientUtil.GradientType.Random)
-                    line.Gradient = GradientUtil.CreatedGradient;
-                
-                else
-                    line.Gradient = GradientUtil.BuildGradientFromConfig(hueOffset);
+                line.Gradient = GradientUtil.BuildGradient(Config.GradientType, hueOffset);
             }
             else
             {
                 GradientUtil.GradientType gradientType = MultiplayerManager.GetPlayerGradientType(netId);
                 if (gradientType == GradientUtil.GradientType.Random)
                 {
-                    line.Gradient = MultiplayerManager.GetPlayerGradient(netId);
+                    line.Gradient = GradientUtil.BuildKeyframeFromGradientColors(MultiplayerManager.GetPlayerGradient(netId), hueOffset);
                 }
                 else
                 {
-                    line.Gradient = GradientUtil.BuildSpecificGradient(gradientType, hueOffset);
+                    line.Gradient = GradientUtil.BuildGradient(gradientType, hueOffset);
                 }
             }
         }

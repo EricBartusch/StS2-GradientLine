@@ -19,7 +19,7 @@ public class Config : SimpleModConfig
     public static double RandomGradientSize { get; set; } = 5;
 
     private readonly List<EventHandler> _configChangedHandlers = [];
-    private float _previewHueOffset;
+    private static float _previewHueOffset;
     private bool _wasRandomizeEnabled;
     private double _lastRandomGradientSize;
     private GradientUtil.GradientType _lastGradientType;
@@ -44,7 +44,7 @@ public class Config : SimpleModConfig
         gradientPreview.CustomMinimumSize = new Vector2(120, 16);
         
         // Save the gradient made here for if they use the random option
-        GradientUtil.CreatedGradient = GradientUtil.BuildGradientFromConfig(_previewHueOffset);
+        GradientUtil.CreatedGradient = GradientUtil.BuildGradient(GradientType, _previewHueOffset);
         gradientPreview.SetGradient(GradientUtil.CreatedGradient);
         
         EventHandler gradientUpdateHandler = (sender, args) =>
@@ -69,7 +69,8 @@ public class Config : SimpleModConfig
 
             if (shouldRebuildGradient || reselectedRandom)
             {
-                GradientUtil.CreatedGradient = GradientUtil.BuildGradientFromConfig(_previewHueOffset);
+                GradientUtil.CreatedGradient = null;
+                GradientUtil.CreatedGradient = GradientUtil.BuildGradient(GradientType, _previewHueOffset);
                 gradientPreview.SetGradient(GradientUtil.CreatedGradient);
             }
         };
@@ -114,6 +115,11 @@ public class Config : SimpleModConfig
         bool customColorsChanged = RandomGradientSize != _lastRandomGradientSize;
 
         return gradientTypeChanged || customColorsChanged;
+    }
+
+    public static float GetPreviewHueOffset()
+    {
+        return _previewHueOffset;
     }
 
     private void ClearUIEventHandlers()
