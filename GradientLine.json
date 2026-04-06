@@ -3,9 +3,9 @@
   "name": "Map Line Gradients",
   "author": "EricB",
   "description": "Changes the color of the map drawing lines to be various gradients",
-  "version": "v1.3.2",
+  "version": "v1.4.0",
   "has_pck": true,
   "has_dll": true,
   "dependencies": ["BaseLib"],
-  "affects_gameplay": true
+  "affects_gameplay": false
 }

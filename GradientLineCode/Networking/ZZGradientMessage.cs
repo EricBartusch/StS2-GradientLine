@@ -3,7 +3,7 @@ using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Multiplayer.Serialization;
 using MegaCrit.Sts2.Core.Multiplayer.Transport;
 
-public class GradientMessage : INetMessage, IPacketSerializable
+public class ZZGradientMessage : INetMessage, IPacketSerializable
 {
     public Color[]? Colors;
     public float[]? Offsets;

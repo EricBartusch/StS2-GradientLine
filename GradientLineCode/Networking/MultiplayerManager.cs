@@ -18,9 +18,10 @@ public static class MultiplayerManager
     {
         _netGameService = netGameService;
         _localPlayerId = netGameService.NetId;
-        netGameService.RegisterMessageHandler<GradientTypeMessage>(OnGradientMessageReceived);
-        netGameService.RegisterMessageHandler<LineStartMessage>(OnLineStartMessageReceived);
-        netGameService.RegisterMessageHandler<GradientMessage>(OnGradientMessageReceived);
+        // They're all prefixed with ZZ to put them at the end of the Messages list in order to allow the game to start with a nonmodded client
+        netGameService.RegisterMessageHandler<ZZGradientTypeMessage>(OnGradientMessageReceived);
+        netGameService.RegisterMessageHandler<ZZLineStartMessage>(OnLineStartMessageReceived);
+        netGameService.RegisterMessageHandler<ZZGradientMessage>(OnGradientMessageReceived);
     }
     
     public static void BroadcastGradientType()
@@ -30,7 +31,7 @@ public static class MultiplayerManager
             return;
         }
         
-        var message = new GradientTypeMessage
+        var message = new ZZGradientTypeMessage
         {
             PlayerId = _localPlayerId,
             GradientType = Config.GradientType
@@ -51,7 +52,7 @@ public static class MultiplayerManager
             Config.SetSavedRandomGradient(GradientUtil.BuildGradient(GradientUtil.GradientType.Random, Config.GetPreviewHueOffset()));
         }
 
-        var message = new GradientMessage()
+        var message = new ZZGradientMessage()
         {
             PlayerId = _localPlayerId,
             Colors = Config.GetSavedRandomGradient()?.Colors,
@@ -70,7 +71,7 @@ public static class MultiplayerManager
         _currentLineHues[_localPlayerId] = startingHue;
         
         // Broadcast to other players
-        var message = new LineStartMessage
+        var message = new ZZLineStartMessage
         {
             PlayerId = _localPlayerId,
             StartingHue = startingHue
@@ -83,7 +84,7 @@ public static class MultiplayerManager
     {
         return _playerGradientTypes.TryGetValue(playerId, out var type) 
             ? type 
-            : GradientUtil.GradientType.Rainbow;
+            : GradientUtil.GradientType.None;
     }
     
     public static float GetCurrentLineHue(ulong playerId)
@@ -107,17 +108,17 @@ public static class MultiplayerManager
         return playerId == _localPlayerId;
     }
     
-    private static void OnGradientMessageReceived(GradientTypeMessage typeMessage, ulong senderId)
+    private static void OnGradientMessageReceived(ZZGradientTypeMessage typeMessage, ulong senderId)
     {
         _playerGradientTypes[senderId] = typeMessage.GradientType;
     }
     
-    private static void OnLineStartMessageReceived(LineStartMessage message, ulong senderId)
+    private static void OnLineStartMessageReceived(ZZLineStartMessage message, ulong senderId)
     {
         _currentLineHues[senderId] = message.StartingHue;
     }
     
-    private static void OnGradientMessageReceived(GradientMessage message, ulong senderId)
+    private static void OnGradientMessageReceived(ZZGradientMessage message, ulong senderId)
     {
         _playerGradients[senderId] = message.ToGradient();
     }

@@ -2,26 +2,26 @@
 using MegaCrit.Sts2.Core.Multiplayer.Serialization;
 using MegaCrit.Sts2.Core.Multiplayer.Transport;
 
-namespace GradientLine.GradientLineCode.Networking;
+namespace GradientLine.GradientLineCode;
 
-public class LineStartMessage : INetMessage, IPacketSerializable
+public class ZZGradientTypeMessage : INetMessage, IPacketSerializable
 {
     public ulong PlayerId;
-    public float StartingHue;
+    public GradientUtil.GradientType GradientType;
 
     public bool ShouldBroadcast => true;
     public NetTransferMode Mode => NetTransferMode.Reliable;
-    public LogLevel LogLevel => LogLevel.Debug;
+    public LogLevel LogLevel => LogLevel.Info;
 
     public void Serialize(PacketWriter writer)
     {
         writer.WriteULong(PlayerId);
-        writer.WriteFloat(StartingHue);
+        writer.WriteUShort((ushort)GradientType);
     }
 
     public void Deserialize(PacketReader reader)
     {
         PlayerId = reader.ReadULong();
-        StartingHue = reader.ReadFloat();
+        GradientType = (GradientUtil.GradientType)reader.ReadShort();
     }
 }
