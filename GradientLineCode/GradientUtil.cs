@@ -16,7 +16,8 @@ public class GradientUtil
         Christmas,
         Spring,
         Random,
-        Custom
+        Custom,
+        None
     }
 
     public static Gradient BuildGradient(GradientType type, float hueOffset, Gradient? savedRandomGradient = null, bool reRandomize = false)

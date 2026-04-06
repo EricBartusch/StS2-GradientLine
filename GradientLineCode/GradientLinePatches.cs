@@ -66,7 +66,8 @@ public class GradientLinePatches
             float remoteHue = MultiplayerManager.GetCurrentLineHue(playerId);
             GradientUtil.GradientType gradientType = MultiplayerManager.GetPlayerGradientType(playerId);
 
-            line.Gradient = BuildRemoteGradient(gradientType, remoteHue, playerId);
+            if(gradientType != GradientUtil.GradientType.None)
+                line.Gradient = BuildRemoteGradient(gradientType, remoteHue, playerId);
         }
 
         private static Gradient BuildRemoteGradient(
@@ -139,7 +140,9 @@ public class GradientLinePatches
         private static void UpdateRemotePlayerLine(Line2D line, ulong playerId, float hueOffset)
         {
             GradientUtil.GradientType gradientType = MultiplayerManager.GetPlayerGradientType(playerId);
-            
+
+            if (gradientType == GradientUtil.GradientType.None)
+                return;
             if (gradientType == GradientUtil.GradientType.Random)
             {
                 line.Gradient = GradientUtil.BuildKeyframeFromGradientColors(
