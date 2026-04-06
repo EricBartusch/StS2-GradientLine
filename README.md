@@ -4,6 +4,7 @@ A mod for **Slay the Spire 2** that replaces the plain-colored freehand map draw
 
 ## Features
 
+- **Multiplayer-safe version so your teammates don't need to have the mod**
 - **Built-in gradient presets**
 - **Custom palette** - define your own gradient using up to 10 hex color codes
 - **Live preview** of the selected gradient in the mod settings UI
