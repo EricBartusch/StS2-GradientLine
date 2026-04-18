@@ -120,6 +120,5 @@ public static Gradient BuildGradient(float hueOffset)
 ```
 
 ## TODO
-- Color picker for custom colors
 - Make erasing better
 - Allow gradient to repeat
