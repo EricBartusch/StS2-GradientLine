@@ -1,5 +1,5 @@
-﻿using Godot;
-using GodotPlugins.Game;
+﻿using BaseLib.Utils;
+using Godot;
 using GradientLine.GradientLineCode.Networking;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -42,20 +42,23 @@ public class GradientLinePatches
 
         private static void HandleLocalPlayerLine(Line2D line, float startingHue)
         {
-            line.Gradient = GradientUtil.BuildGradient(
-                Config.GradientType, 
-                startingHue, 
-                Config.GetSavedRandomGradient(), 
-                Config.RandomizeEachLine
-            );
-
-            bool isRandomWithReroll = Config.GradientType == GradientUtil.GradientType.Random 
-                                   && Config.RandomizeEachLine;
-            
-            if (isRandomWithReroll)
+            if (Config.GradientType != GradientUtil.GradientType.None)
             {
-                Config.SetSavedRandomGradient(line.Gradient);
-                MultiplayerManager.BroadcastGradient();
+                line.Gradient = GradientUtil.BuildGradient(
+                    Config.GradientType,
+                    startingHue,
+                    Config.GetSavedRandomGradient(),
+                    Config.RandomizeEachLine
+                );
+
+                bool isRandomWithReroll = Config.GradientType == GradientUtil.GradientType.Random
+                                          && Config.RandomizeEachLine;
+
+                if (isRandomWithReroll)
+                {
+                    Config.SetSavedRandomGradient(line.Gradient);
+                    MultiplayerManager.BroadcastGradient();
+                }
             }
 
             MultiplayerManager.BroadcastLineStart(startingHue);
@@ -130,6 +133,8 @@ public class GradientLinePatches
 
         private static void UpdateLocalPlayerLine(Line2D line, float hueOffset)
         {
+            if (Config.GradientType == GradientUtil.GradientType.None)
+                return;
             line.Gradient = GradientUtil.BuildGradient(
                 Config.GradientType, 
                 hueOffset, 
@@ -168,6 +173,22 @@ public class GradientLinePatches
                 Line = line;
                 IsValid = isValid;
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(NMapDrawings), "StopDrawingLine")]
+    public static class WhyAmIDoingItThisWay
+    {
+        [HarmonyPrefix]
+        private static bool StopDrawingLinePatch(NMapDrawings __instance, object state)
+        {
+            var traverse = Traverse.Create(state);
+            var finishedLine = traverse.Field("currentlyDrawingLine").GetValue<Line2D>();
+
+            LineAnimator.LineElapsedTime[finishedLine] = 0f;
+            LineAnimator.BaseLineGradients[finishedLine] = finishedLine.Gradient.Duplicate() as Gradient;
+
+            return true;
         }
     }
 }
