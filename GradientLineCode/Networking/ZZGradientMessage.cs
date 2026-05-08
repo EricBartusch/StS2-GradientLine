@@ -12,6 +12,7 @@ public class ZZGradientMessage : INetMessage, IPacketSerializable
     public bool ShouldBroadcast => true;
     public NetTransferMode Mode => NetTransferMode.Reliable;
     public LogLevel LogLevel => LogLevel.Info;
+    public bool ShouldBuffer { get; }
 
     public void Serialize(PacketWriter writer)
     {
