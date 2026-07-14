@@ -30,6 +30,14 @@ public class GradientLinePatches
             {
                 HandleRemotePlayerLine(__result, playerId);
             }
+
+            // Register at creation rather than at StopDrawingLine, so lines created
+            // outside the normal Drawing mode (e.g. by other mods) animate too
+            if (__result.Gradient != null)
+            {
+                LineAnimator.LineElapsedTime[__result] = 0f;
+                LineAnimator.BaseLineGradients[__result] = __result.Gradient.Duplicate() as Gradient;
+            }
         }
 
         private static float CalculateStartingHue()
@@ -108,6 +116,11 @@ public class GradientLinePatches
             {
                 UpdateRemotePlayerLine(lineState.Line, lineState.PlayerId, animatedHueOffset);
             }
+
+            // Keep the animator's base in sync so its time-based updates don't
+            // overwrite the point-based animation while the line is being drawn
+            LineAnimator.LineElapsedTime[lineState.Line] = 0f;
+            LineAnimator.BaseLineGradients[lineState.Line] = lineState.Line.Gradient.Duplicate() as Gradient;
         }
 
         private static LineState ExtractLineState(object state)
@@ -168,26 +181,6 @@ public class GradientLinePatches
                 Line = line;
                 IsValid = isValid;
             }
-        }
-    }
-
-    [HarmonyPatch(typeof(NMapDrawings), "StopDrawingLine")]
-    public static class WhyAmIDoingItThisWay
-    {
-        [HarmonyPrefix]
-        private static bool StopDrawingLinePatch(NMapDrawings __instance, object state)
-        {
-            var traverse = Traverse.Create(state);
-            var mode = traverse.Field("drawingMode").GetValue<DrawingMode>();
-
-            if (mode == DrawingMode.Drawing)
-            {
-                var finishedLine = traverse.Field("currentlyDrawingLine").GetValue<Line2D>();
-                LineAnimator.LineElapsedTime[finishedLine] = 0f;
-                LineAnimator.BaseLineGradients[finishedLine] = finishedLine.Gradient.Duplicate() as Gradient;
-            }
-
-            return true;
         }
     }
 }

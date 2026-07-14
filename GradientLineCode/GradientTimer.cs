@@ -26,6 +26,7 @@ public static class LineAnimator
             if (!GodotObject.IsInstanceValid(line))
             {
                 LineElapsedTime.Remove(line);
+                BaseLineGradients.Remove(line);
                 continue;
             }
 
