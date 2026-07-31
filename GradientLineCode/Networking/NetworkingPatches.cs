@@ -14,7 +14,7 @@ public static class NetworkEventPatches
 {
     [HarmonyPatch(typeof(NCharacterSelectScreen), "PlayerConnected")]
     [HarmonyPostfix]
-    static void OnPlayerConnected(LobbyPlayer player)
+    static void OnPlayerConnected(StartRunLobbyPlayer player)
     {
         if (player.id == MultiplayerManager.LocalPlayerId)
             return;
